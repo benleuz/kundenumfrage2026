@@ -1,33 +1,41 @@
 /* Layout: schmale Fragebogen-Spalte mit Schrittleiste oben; Auswertung als zweite Ansicht für die Inhaberin/den Inhaber */
+/* Layout: dunkler Apriko-Kopfbalken mit Markenverlauf, darunter schmale Fragebogen-Spalte */
 :root{
-  --bg:#F3F5F6; --surface:#FFFFFF; --ink:#13202A; --muted:#5B6873; --line:#D9DFE3;
-  --accent:#1F57D6; --accent-ink:#FFFFFF; --accent-soft:#E4ECFB;
-  --good:#1D7A4E; --warn:#B26B00; --bad:#B4362E; --chip:#EEF1F3;
-  --f-display:"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
-  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --bg:#F3F5F2; --surface:#FFFFFF; --ink:#262626; --muted:#5D655E; --line:#DCE2DA;
+  --accent:#262626; --accent-ink:#FFFFFF; --accent-soft:#EDF8E1; --accent-text:#2F7D4E;
+  --lime:#D3F16B; --mint:#89E985; --teal:#73EAB4;
+  --grad:linear-gradient(90deg,#D3F16B 0%,#BEEE5C 30%,#89E985 65%,#73EAB4 100%);
+  --on-grad:#262626;
+  --head-bg:#262626; --head-ink:#F4F6F1; --head-muted:#B9C1B8;
+  --good:#2F8F5B; --warn:#A86A00; --bad:#B4362E; --chip:#ECEFEA;
+  --f-display:"Carlito", Calibri, "Segoe UI", Arial, sans-serif;
+  --f-body:"Carlito", Calibri, "Segoe UI", Arial, sans-serif;
   --f-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
   --r:10px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0E151B; --surface:#16202A; --ink:#E6ECF0; --muted:#97A4AE; --line:#2A3743;
-  --accent:#6E98FF; --accent-ink:#0B1220; --accent-soft:#1C2A45;
-  --good:#4CC28A; --warn:#E3A24A; --bad:#EF7A70; --chip:#1E2A35; color-scheme:dark}}
+  --bg:#1B1C1B; --surface:#262626; --ink:#EEF1EC; --muted:#A3ABA2; --line:#3A3D3A;
+  --accent:#BEEE5C; --accent-ink:#1B1C1B; --accent-soft:#2E3A24; --accent-text:#9BE58A;
+  --head-bg:#121312; --head-ink:#F4F6F1; --head-muted:#A3ABA2;
+  --good:#7FD99A; --warn:#E3A24A; --bad:#EF7A70; --chip:#303330; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0E151B; --surface:#16202A; --ink:#E6ECF0; --muted:#97A4AE; --line:#2A3743;
-  --accent:#6E98FF; --accent-ink:#0B1220; --accent-soft:#1C2A45;
-  --good:#4CC28A; --warn:#E3A24A; --bad:#EF7A70; --chip:#1E2A35; color-scheme:dark}
+  --bg:#1B1C1B; --surface:#262626; --ink:#EEF1EC; --muted:#A3ABA2; --line:#3A3D3A;
+  --accent:#BEEE5C; --accent-ink:#1B1C1B; --accent-soft:#2E3A24; --accent-text:#9BE58A;
+  --head-bg:#121312; --head-ink:#F4F6F1; --head-muted:#A3ABA2;
+  --good:#7FD99A; --warn:#E3A24A; --bad:#EF7A70; --chip:#303330; color-scheme:dark}
 
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
 .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
-h1{font-size:clamp(28px,5vw,40px);font-weight:800;letter-spacing:-.02em}
+h1{font-size:clamp(30px,5vw,44px);font-weight:700;letter-spacing:-.01em}
 h2{font-size:24px;font-weight:700;letter-spacing:-.01em}
 h3{font-size:16px;font-weight:700}
 p{margin:0}
 .muted{color:var(--muted)}
-.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text)}
 header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
 .top .intro{display:flex;flex-direction:column;gap:10px;max-width:560px}
 .viewtabs{display:flex;gap:4px;background:var(--chip);padding:4px;border-radius:999px}
@@ -143,3 +151,31 @@ table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{text-align:left;padding:6px 8px;border-top:1px solid var(--line);white-space:nowrap}
 th{font:500 11px var(--f-mono);text-transform:uppercase;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.ibtn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ===== Apriko-Marke ===== */
+.brandbar{background:var(--head-bg);color:var(--head-ink);margin-left:calc(-1 * max(16px, env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(16px, env(safe-area-inset-right,0px)));padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));position:relative}
+.brandbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--grad)}
+.brandbar .inner{max-width:760px;margin:0 auto;padding-block:22px 34px;display:flex;flex-direction:column;gap:14px}
+.brandbar .logo{height:34px;width:auto;align-self:flex-start}
+.brandbar .wordmark{font:700 30px/1 var(--f-display);letter-spacing:-.01em;color:var(--head-ink)}
+.brandbar .wordmark span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brandbar h1{color:var(--head-ink)}
+.brandbar p{color:var(--head-muted);max-width:600px}
+.brandbar .eyebrow{color:var(--lime)}
+body > .wrap{padding-top:24px}
+.bar i{background:var(--grad)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1)}
+.q input:checked+label.dot,.nps input:checked+label{background:var(--grad);border-color:transparent;color:var(--on-grad);font-weight:700}
+.steps button[aria-current="step"]{border-color:var(--ink)}
+.steps button[aria-current="step"] .n{background:var(--grad);color:var(--on-grad)}
+.steps button.done .n{background:var(--good);color:#fff}
+.checks label:has(input:checked){border-color:var(--good);background:var(--accent-soft)}
+.checks input{accent-color:var(--good)}
+.zone.prio{border-color:var(--good);background:var(--accent-soft)}
+.prio .card:nth-child(-n+3) .rank{background:var(--grad);color:var(--on-grad)}
+.hbar .track i[style*="var(--accent)"]{background:var(--grad)!important}
+.msg.ok{border-color:var(--good)}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--good);outline-offset:2px}
+.card .t{overflow-wrap:anywhere}

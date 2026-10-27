@@ -6,21 +6,22 @@
 <meta name="robots" content="noindex">
 <title>Auswertung Kundenumfrage 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="style.css">
 <style>
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top"><div class="intro">
+  <header class="brandbar"><div class="inner">
+    <img class="logo" src="logo.png" alt="Apriko" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="wordmark" hidden>Apriko</span>
     <span class="eyebrow">Intern · Apriko</span>
     <h1>Auswertung Kundenumfrage 2026</h1>
-    <p class="muted">Sammeln Sie hier die Antwort-Codes aus den Kunden-Mails. Alles läuft lokal in Ihrem Browser.</p>
+    <p>Hier sammelst du die Antwort-Codes aus den Kunden-Mails. Alles läuft lokal in deinem Browser.</p>
   </div></header>
+<div class="wrap">
   <div class="panel">
     <div class="panel-head"><h2>Antwort-Codes einfügen</h2>
-      <p class="muted">Kopieren Sie die Codes aus den E-Mails hierher. Ganze Mails gehen auch, die Codes werden automatisch erkannt. Doppelte Codes zählen nur einmal.</p></div>
+      <p class="muted">Kopier die Codes aus den E-Mails hierher. Ganze Mails gehen auch, die Codes werden automatisch erkannt. Doppelte Codes zählen nur einmal.</p></div>
     <div class="field"><label for="codes">Codes oder E-Mail-Texte</label><textarea id="codes" style="min-height:140px;font-family:var(--f-mono);font-size:13px" placeholder="APK1:…"></textarea></div>
     <div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="addCodes">Hinzufügen</button><button type="button" class="btn ghost" id="clearCodes">Alle entfernen</button><span class="note" id="fileInfo"></span></div>
     <div id="confirmClear" class="msg err" hidden><b>Alle gespeicherten Codes aus diesem Browser entfernen?</b><div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="clearYes">Ja, entfernen</button><button type="button" class="btn ghost" id="clearNo">Abbrechen</button></div></div>
@@ -41,7 +42,7 @@ function color(v,max){ const r=v/max; return r>=.75?"var(--good)":r>=.55?"var(--
 let latest = [];
 function renderResults(){
   const R = latest, n = R.length;
-  if(!n){ results.innerHTML = `<div class="panel"><div class="panel-head"><span class="eyebrow">Auswertung</span><h2>Noch keine Antworten</h2><p class="muted">Fügen Sie oben die Antwort-Codes aus den Kunden-Mails ein. Danach erscheinen hier NPS, Bewertungen pro Bereich, die Roadmap-Rangliste und alle Kommentare.</p></div></div>`; return; }
+  if(!n){ results.innerHTML = `<div class="panel"><div class="panel-head"><span class="eyebrow">Auswertung</span><h2>Noch keine Antworten</h2><p class="muted">Füg oben die Antwort-Codes aus den Kunden-Mails ein. Danach erscheinen hier NPS, Bewertungen pro Bereich, die Roadmap-Rangliste und alle Kommentare.</p></div></div>`; return; }
   const nps = R.map(r=>r.answers.nps).filter(x=>x!=null).map(Number);
   const pro = nps.filter(x=>x>=9).length, det = nps.filter(x=>x<=6).length;
   const npsScore = nps.length? Math.round((pro-det)/nps.length*100) : null;
@@ -59,12 +60,28 @@ function renderResults(){
     const cs = R.filter(r=>r.answers["c_"+s.id]);
     html += `</div>${cs.length?`<div><h3>Kommentare</h3>${cs.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers["c_"+s.id])}</div>`).join("")}</div>`:''}</div>`;
   });
-  // Roadmap: Punkte = (11 - Rang), min 1 → Top-Plätze zählen mehr
+  // Entwicklungsfortschritt 2026
+  const fs = {}; R.forEach(r=>{ const v = r.answers.g_fortschritt; if(v) fs[v]=(fs[v]||0)+1; });
+  const fsN = Object.values(fs).reduce((a,b)=>a+b,0);
+  const fsTxt = R.filter(r=>r.answers.g_fortschritt_txt);
+  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Wahrnehmung</span><h2>Entwicklungsfortschritte 2026 bemerkt?</h2><p class="note">${fsN} Antworten</p></div><div>${
+    FORTSCHRITT.map(o=>{ const c = fs[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${fsN?(c/fsN*100).toFixed(0):0}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`; }).join("")}</div>
+    ${fsTxt.length?`<div><h3>Kommentare</h3>${fsTxt.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.g_fortschritt||'')}</div>${esc(r.answers.g_fortschritt_txt)}</div>`).join("")}</div>`:''}</div>`;
+  // API-Nutzung
+  const ap = {}; R.forEach(r=>{ const v = r.answers.api; if(v) ap[v]=(ap[v]||0)+1; });
+  const apN = Object.values(ap).reduce((a,b)=>a+b,0);
+  const apTxt = R.filter(r=>r.answers.api_txt);
+  const leads = R.filter(r=>API_LEAD && r.answers.api===API_LEAD);
+  if(API_OPTIONS.length) html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Integrationen</span><h2>API: bekannt und genutzt?</h2><p class="note">${apN} Antworten</p></div><div>${
+    API_OPTIONS.map(o=>{ const c = ap[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${apN?(c/apN*100).toFixed(0):0}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`; }).join("")}</div>
+    ${leads.length?`<div><h3>Möchten kontaktiert werden (${leads.length})</h3>${leads.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers.api_txt||'(keine Systeme genannt)')}${r.answers.kname||r.answers.kmail?` · Kontakt: ${esc(r.answers.kname||'')} ${esc(r.answers.kmail||'')}`:''}</div>`).join("")}</div>`:''}
+    ${apTxt.length?`<div><h3>Gewünschte Anbindungen</h3>${apTxt.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.api||'')}</div>${esc(r.answers.api_txt)}</div>`).join("")}</div>`:''}</div>`;
+  // Roadmap: Platz 1 = 3, Platz 2 = 2, Platz 3 = 1 Punkt
   const score = {}, votes = {}, own = [];
   R.forEach(r=>(r.roadmap||[]).forEach(x=>{ if(x.own){ own.push({t:x.title,f:r.answers.firma,rank:x.rank}); return; }
-    score[x.title]=(score[x.title]||0)+Math.max(1,11-x.rank); votes[x.title]=(votes[x.title]||0)+1; }));
+    score[x.title]=(score[x.title]||0)+Math.max(1,4-x.rank); votes[x.title]=(votes[x.title]||0)+1; }));
   const ranked = Object.entries(score).sort((a,b)=>b[1]-a[1]); const mx = ranked.length? ranked[0][1] : 1;
-  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Roadmap</span><h2>Gewünschte Themen</h2><p class="note">Punkte: Platz 1 = 10, Platz 2 = 9 … ab Platz 10 je 1 Punkt. In Klammern: Anzahl Nennungen.</p></div><div>${
+  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Roadmap</span><h2>Gewünschte Themen</h2><p class="note">Punkte: Platz 1 = 3, Platz 2 = 2, Platz 3 = 1. In Klammern: Anzahl Nennungen.</p></div><div>${
     ranked.map(([t,s])=>`<div class="hbar"><span>${esc(t)} <span class="muted">(${votes[t]})</span></span><span class="track"><i style="width:${(s/mx*100).toFixed(0)}%;background:var(--accent)"></i></span><span class="v">${s}</span></div>`).join("")||'<p class="muted">Noch keine Priorisierungen.</p>'}</div>
     ${own.length?`<div><h3>Eigene Themen der Kunden</h3>${own.map(o=>`<div class="comment"><div class="who">${esc(o.f||'anonym')} · Platz ${o.rank}</div>${esc(o.t)}</div>`).join("")}</div>`:''}</div>`;
   const bi = {}; R.forEach(r=>(r.answers.bpo_interest||[]).forEach(x=>bi[x]=(bi[x]||0)+1));
@@ -84,7 +101,7 @@ function renderResults(){
 }
 function toCsv(){
   const keys = ["firma","rolle","seit","ma","services"]; SECTIONS.filter(s=>s.items).forEach(s=>{ s.items.forEach(i=>keys.push(i[0])); keys.push("c_"+s.id); });
-  keys.push("c_bpo","bpo_interest","c_roadmap","nps","g_total","g_preis","g_best","g_improve","callback","kname","kmail");
+  keys.push("api","api_txt","c_bpo","bpo_interest","c_roadmap","nps","g_fortschritt","g_fortschritt_txt","g_total","g_preis","g_best","g_improve","callback","kname","kmail");
   const q = v=>'"'+String(v==null?"":Array.isArray(v)?v.join(", "):v).replace(/"/g,'""')+'"';
   const head = keys.concat(["roadmap","eingereicht"]);
   const rows = latest.map(r=>keys.map(k=>q(r.answers[k])).concat([q((r.roadmap||[]).map(x=>x.rank+". "+x.title).join(" | ")), q(r.submittedAt)]).join(";"));

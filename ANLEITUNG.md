@@ -8,11 +8,12 @@ Kein Server, keine Lizenz: Die Umfrage läuft komplett im Browser des Kunden. Am
 |---|---|
 | `index.html` | Die Umfrage für Kunden |
 | `auswertung.html` | Auswertung: Codes aus den Mails einfügen |
-| `fragen.js` | Alle Fragen und Roadmap-Themen – hier ändern, beide Seiten übernehmen es |
+| `fragen.js` | Alle Fragen, Listen, Roadmap-Themen und Texte – **wird aus der Excel-Datei erzeugt**, nicht von Hand ändern |
 | `code.js` | Erzeugt und liest die Antwort-Codes |
-| `style.css` | Gemeinsames Design |
+| `style.css` | Gemeinsames Design (Apriko-Farben) |
+| `logo.png` | **Selbst hinzufügen:** Apriko-Logo (hell, für dunklen Hintergrund). Ohne Datei steht dort «Apriko» als Text. |
 
-Die Empfängeradresse steht oben in `index.html` (`EMPFAENGER`).
+Fragen und Texte änderst du in **Kundenumfrage-2026-Fragen.xlsx** (Blatt «Texte» enthält auch die Empfängeradresse). Die Excel-Datei an Claude geben → neue `fragen.js` → im Repo ersetzen.
 
 ## Auf GitHub Pages veröffentlichen
 
@@ -46,4 +47,4 @@ Die Codes sind nur in dem Browser gespeichert, in dem du sie eingefügt hast. Be
 
 - **NPS:** Anteil 9–10 minus Anteil 0–6, in Prozentpunkten (−100 bis +100).
 - **Bewertungen:** Durchschnitt 1–5, «k. A.» zählt nicht. Zahl in Klammern = Anzahl Antworten.
-- **Roadmap:** Platz 1 = 10 Punkte, Platz 2 = 9 … ab Platz 10 je 1 Punkt; eigene Themen der Kunden separat aufgelistet.
+- **Roadmap:** Jeder Kunde wählt seine Top 3. Platz 1 = 3 Punkte, Platz 2 = 2, Platz 3 = 1; eigene Themen der Kunden separat aufgelistet.

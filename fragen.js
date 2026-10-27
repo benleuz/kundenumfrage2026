@@ -1,67 +1,270 @@
-/* Fragen und Roadmap-Themen – gemeinsam für index.html und auswertung.html.
-   Hier ändern, beide Seiten übernehmen es. */
-var CONTACT = "hello@apriko.com";
-var SCALE = ["1","2","3","4","5"];
-
+/* Automatisch erzeugt aus Kundenumfrage-2026-Fragen.xlsx – Änderungen bitte in der Excel-Datei machen. */
+var TEXTE = {
+ "kopf_eyebrow": "Kundenumfrage 2026 · ca. 8 Minuten",
+ "kopf_titel": "Wie zufrieden bist du mit Apriko?",
+ "kopf_intro": "Deine Rückmeldung zu Software, Support und BPO-Services fliesst direkt in unsere Planung 2027 ein. Im Roadmap-Teil wählst du deine Top 3 für unsere nächsten Entwicklungen.",
+ "ueber_einleitung": "Damit wir die Antworten richtig einordnen können. Der Firmenname ist freiwillig.",
+ "lbl_firma": "Firma (optional)",
+ "lbl_rolle": "Deine Funktion",
+ "lbl_seit": "Kunde von Apriko seit",
+ "lbl_leistungen": "Welche Leistungen nutzt ihr?",
+ "kommentar_bereich": "Was möchtest du uns dazu noch sagen?",
+ "api_frage": "Wusstest du, dass du über unsere offene API praktisch jedes System an Apriko anbinden kannst?",
+ "api_kommentar": "Welche Systeme würdest du gerne anbinden? (z. B. Zeiterfassung, Buchhaltung, Jobportale)",
+ "bpo_interesse": "Welche Prozesse könntest du dir vorstellen, (zusätzlich) an Apriko auszulagern?",
+ "bpo_kommentar": "Anmerkungen zu BPO",
+ "roadmap_titel": "Deine Wunsch-Roadmap",
+ "roadmap_intro": "Welche drei Themen sollen wir als Nächstes bauen? Zieh deine Top 3 nach rechts und sortiere sie: Platz 1 ist am wichtigsten. Fehlt dein Thema, füg es unten hinzu.",
+ "roadmap_eigen": "Eigenes Thema hinzufügen",
+ "roadmap_kommentar": "Möchtest du eines der Themen genauer beschreiben?",
+ "nps_frage": "Wie wahrscheinlich ist es, dass du Apriko einem Geschäftskontakt weiterempfiehlst?",
+ "nps_0": "0 = gar nicht wahrscheinlich",
+ "nps_10": "10 = äusserst wahrscheinlich",
+ "fortschritt_frage": "Hast du im 2026 Entwicklungsfortschritte bei Apriko bemerkt?",
+ "fortschritt_kommentar": "Welche Fortschritte sind dir aufgefallen, oder was hast du vermisst?",
+ "g_best": "Was schätzt du an Apriko am meisten?",
+ "g_improve": "Was sollten wir als Erstes verbessern?",
+ "gespraech": "Ich wünsche mir ein persönliches Gespräch zu meinem Feedback",
+ "mail_betreff": "Kundenumfrage 2026 – <Firma>",
+ "mail_anrede": "Hallo Apriko-Team",
+ "mail_text": "hier sind meine Antworten zur Apriko-Kundenumfrage 2026.",
+ "mail_gruss": "Liebe Grüsse",
+ "empfaenger": "hello@apriko.com"
+};
+function T(k, fallback){ return (k in TEXTE) ? TEXTE[k] : (fallback || ''); }
+var CONTACT = T('empfaenger','hello@apriko.com');
+var SCALE = ['1','2','3','4','5'];
 var SECTIONS = [
- {id:"about", title:"Über Sie", kind:"about"},
- {id:"qualitaet", title:"Qualität", kind:"rating", lead:"Wie zuverlässig und sauber funktioniert Apriko im Alltag?",
-  items:[
-   ["q_stab","Stabilität und Verfügbarkeit","Systemausfälle, Wartungsfenster"],
-   ["q_perf","Geschwindigkeit","Ladezeiten, Lohnlauf, Auswertungen"],
-   ["q_lohn","Korrektheit der Lohnabrechnung","Sozialversicherungen, Quellensteuer, GAV"],
-   ["q_rel","Qualität neuer Releases","Fehler nach Updates, Kommunikation zu Änderungen"],
-   ["q_daten","Datenqualität und Auswertungen","Reports, Statistiken, Exporte"]]},
- {id:"funktion", title:"Funktionalität", kind:"rating", lead:"Deckt die Software ab, was Ihr Team im Personalverleih braucht?",
-  items:[
-   ["f_umfang","Funktionsumfang insgesamt",""],
-   ["f_bedien","Bedienbarkeit","Übersichtlichkeit, Anzahl Klicks"],
-   ["f_dispo","Disposition und Einsatzplanung",""],
-   ["f_rapport","Rapporte und Zeiterfassung",""],
-   ["f_lohn","Lohnverarbeitung",""],
-   ["f_faktura","Fakturierung und Debitoren",""],
-   ["f_schnitt","Schnittstellen","Buchhaltung, Swissdec/ELM, Banken"],
-   ["f_mobile","Nutzung unterwegs","Smartphone, Tablet"]]},
- {id:"support", title:"Support", kind:"rating", lead:"Wie erleben Sie unseren Support, wenn Sie Hilfe brauchen?",
-  items:[
-   ["s_erreich","Erreichbarkeit",""],
-   ["s_reakt","Reaktionszeit",""],
-   ["s_loesung","Qualität der Lösungen","Problem beim ersten Kontakt gelöst"],
-   ["s_fach","Fachwissen zu Personalverleih und Lohn",""],
-   ["s_freund","Freundlichkeit",""],
-   ["s_doku","Dokumentation und Schulungen",""]]},
- {id:"bpo", title:"BPO", kind:"bpo", lead:"Business Process Outsourcing: Prozesse, die Apriko für Sie übernimmt (z. B. Lohnverarbeitung).",
-  items:[
-   ["b_termin","Termintreue der Lohnläufe",""],
-   ["b_fehler","Fehlerfreiheit",""],
-   ["b_komm","Kommunikation und feste Ansprechperson",""],
-   ["b_entl","Entlastung Ihres Teams",""],
-   ["b_preis","Preis-Leistungs-Verhältnis",""]]},
- {id:"roadmap", title:"Roadmap", kind:"roadmap"},
- {id:"gesamt", title:"Gesamteindruck", kind:"overall"}
+ {
+  "id": "about",
+  "title": "Über dich",
+  "kind": "about"
+ },
+ {
+  "id": "qualitaet",
+  "title": "Qualität",
+  "kind": "rating",
+  "lead": "Wie zuverlässig und sauber funktioniert Apriko im Alltag?",
+  "items": [
+   [
+    "q_stab",
+    "Stabilität und Verfügbarkeit",
+    "Systemausfälle, Wartungsfenster"
+   ],
+   [
+    "q_perf",
+    "Geschwindigkeit",
+    "Ladezeiten, Lohnlauf, Auswertungen"
+   ],
+   [
+    "q_lohn",
+    "Korrektheit der Lohnabrechnung/Rechnung",
+    "Sozialversicherungen, Quellensteuer, GAV, Faktura"
+   ],
+   [
+    "q_rel",
+    "Qualität neuer Releases",
+    "Fehler nach Updates, Kommunikation zu Änderungen"
+   ],
+   [
+    "q_daten",
+    "Datenqualität und Auswertungen",
+    "Reports, Statistiken, Exporte"
+   ]
+  ]
+ },
+ {
+  "id": "funktion",
+  "title": "Funktionalität",
+  "kind": "rating",
+  "lead": "Deckt die Software ab, was dein Team im Personalverleih braucht?",
+  "items": [
+   [
+    "f_umfang",
+    "Funktionsumfang insgesamt",
+    ""
+   ],
+   [
+    "f_bedien",
+    "Bedienbarkeit",
+    "Übersichtlichkeit, Anzahl Klicks"
+   ],
+   [
+    "f_dispo",
+    "Disposition und Einsatzplanung",
+    ""
+   ],
+   [
+    "f_rapport",
+    "Rapporte und Zeiterfassung",
+    ""
+   ],
+   [
+    "f_lohn",
+    "Lohnverarbeitung",
+    ""
+   ],
+   [
+    "f_faktura",
+    "Fakturierung und Debitoren",
+    ""
+   ],
+   [
+    "f_schnitt",
+    "Schnittstellen",
+    "Buchhaltung, Banken, Sonstiges"
+   ],
+   [
+    "f_mobile",
+    "Nutzung unterwegs",
+    "Smartphone, Tablet"
+   ]
+  ]
+ },
+ {
+  "id": "support",
+  "title": "Support",
+  "kind": "rating",
+  "lead": "Wie erlebst du unseren Support, wenn du Hilfe brauchst?",
+  "items": [
+   [
+    "s_erreich",
+    "Erreichbarkeit",
+    ""
+   ],
+   [
+    "s_reakt",
+    "Reaktionszeit",
+    ""
+   ],
+   [
+    "s_loesung",
+    "Qualität der Lösungen",
+    "Problem beim ersten Kontakt gelöst"
+   ],
+   [
+    "s_fach",
+    "Fachwissen zu Personalverleih und Lohn",
+    ""
+   ],
+   [
+    "s_freund",
+    "Freundlichkeit",
+    ""
+   ],
+   [
+    "s_doku",
+    "Dokumentation und Schulungen",
+    ""
+   ]
+  ]
+ },
+ {
+  "id": "bpo",
+  "title": "BPO",
+  "kind": "bpo",
+  "lead": "Business Process Outsourcing: Prozesse, die Apriko für euch übernimmt (z. B. Lohnverarbeitung).",
+  "items": [
+   [
+    "b_termin",
+    "Termintreue der Lohnläufe",
+    ""
+   ],
+   [
+    "b_fehler",
+    "Fehlerfreiheit",
+    ""
+   ],
+   [
+    "b_komm",
+    "Kommunikation und feste Ansprechperson",
+    ""
+   ],
+   [
+    "b_entl",
+    "Entlastung deines Teams",
+    ""
+   ]
+  ]
+ },
+ {
+  "id": "roadmap",
+  "title": "Roadmap",
+  "kind": "roadmap"
+ },
+ {
+  "id": "gesamt",
+  "title": "Gesamteindruck",
+  "kind": "overall",
+  "items": [
+   [
+    "g_total",
+    "Gesamtzufriedenheit mit Apriko",
+    ""
+   ]
+  ]
+ }
 ];
-
-var BPO_OPTIONS = ["Lohnverarbeitung","Quellensteuer-Abrechnung","Behördenmeldungen (AHV, SUVA, BVG)","Debitorenbuchhaltung und Mahnwesen","Kreditoren und Zahlungsverkehr","Rapporterfassung","Bewerber-Vorselektion","Jahresabschluss-Unterstützung"];
-
 var TOPICS = [
- ["sig","Digitale Signatur","Einsatz- und Rahmenverträge elektronisch unterschreiben"],
- ["ats","ATS / Bewerbermanagement","Bewerbungen erfassen, Pipeline, Absagen"],
- ["multipost","Multiposting Stelleninserate","Jobs auf mehreren Portalen gleichzeitig"],
- ["cvparse","CV-Parsing","Lebensläufe automatisch einlesen"],
- ["match","KI-Matching","Kandidaten passend zum Auftrag vorschlagen"],
- ["app_ma","App für Temporärmitarbeitende","Rapporte, Lohnabrechnungen, Einsätze"],
- ["portal","Kundenportal","Rapporte freigeben, Rechnungen, Einsätze"],
- ["zeit","Mobile Zeiterfassung","Stempeln und Rapportieren per Smartphone"],
- ["gav","Automatische GAV-Prüfung","Mindestlöhne und Zuschläge prüfen"],
- ["dms","Digitales Personaldossier","Dokumente, Bewilligungen, Fristen"],
- ["dash","Dashboards und Reporting","Kennzahlen auf einen Blick"],
- ["erech","E-Rechnung","Rechnungen elektronisch versenden"],
- ["fibu","Buchhaltungs-Schnittstellen","Abacus, Bexio, Sage u. a."],
- ["bank","Banking-Anbindung","Zahlungen und Kontoauszüge automatisch"],
- ["m365","Microsoft-365-Integration","Outlook, Teams, SharePoint"],
- ["ki","KI-Assistent in der Software","Fragen stellen, Texte und Verträge entwerfen"]
+ [
+  "sig",
+  "Digitale Signatur",
+  "Einsatz- und Rahmenverträge elektronisch unterschreiben"
+ ],
+ [
+  "ats",
+  "ATS Funktionen / Bewerbermanagement",
+  "ATS, Multiposting, KI-Matching, etc"
+ ],
+ [
+  "cvparse",
+  "CV-Parsing",
+  "Lebensläufe automatisch einlesen"
+ ],
+ [
+  "app_ma",
+  "App für Temporärmitarbeitende",
+  "Rapporte erfassen, Lohnabrechnungen, Einsätze"
+ ],
+ [
+  "portal",
+  "Kundenportal",
+  "Rapporte freigeben, Rechnungen, Einsätze"
+ ],
+ [
+  "gav",
+  "Automatische GAV-Prüfung",
+  "Mindestlöhne und Zuschläge prüfen"
+ ],
+ [
+  "dash",
+  "Dashboards und Reporting",
+  "Kennzahlen auf einen Blick"
+ ],
+ [
+  "bank",
+  "Banking-Anbindung",
+  "Bankbewegungen automatisch verbuchen/Zahlungen automatisch hochladen"
+ ],
+ [
+  "m365",
+  "Microsoft-365-Integration",
+  "Outlook, Teams, SharePoint"
+ ],
+ [
+  "ki",
+  "KI-Assistent in der Software",
+  "Fragen stellen, Texte und Verträge entwerfen"
+ ]
 ];
-
-var ROLES = ["Geschäftsleitung","Disposition / Recruiting","Lohn / Administration","Buchhaltung / Finanzen","IT","Andere"];
-var SINCE = ["weniger als 1 Jahr","1–2 Jahre","3–5 Jahre","mehr als 5 Jahre"];
-var SERVICES = ["Software (SaaS)","BPO Lohnverarbeitung","Weitere BPO-Leistungen","Implementierung / Beratung"];
+var ROLES = ["Geschäftsleitung", "Disposition / Recruiting", "Lohn / Administration", "Buchhaltung / Finanzen", "IT", "Andere"];
+var SINCE = ["weniger als 1 Jahr", "1–2 Jahre", "3–5 Jahre", "mehr als 5 Jahre"];
+var MA = ["bis 50", "51–200", "201–500", "über 500"];
+var SERVICES = ["Software", "BPO Lohn- und Debitoren"];
+var BPO_OPTIONS = ["Lohnverarbeitung", "Quellensteuer-Abrechnung", "Behördenmeldungen (AHV, SUVA, BVG)", "Debitorenbuchhaltung und Mahnwesen", "Kreditoren und Zahlungsverkehr", "Rapporterfassung", "Bewerber-Vorselektion", "Jahresabschluss-Unterstützung"];
+var FORTSCHRITT = ["Ja, deutlich", "Ja, etwas", "Kaum", "Nein", "Kann ich nicht beurteilen"];
+var API_OPTIONS = ["Ja, und wir nutzen das bereits", "Ja, aber wir nutzen es (noch) nicht", "Nein, das war mir nicht bewusst", "Klingt spannend, bitte meldet euch bei uns"];
+/* Option in «Leistungen», die den BPO-Abschnitt einblendet: die erste, die «BPO» enthält */
+var BPO_SERVICE = SERVICES.find(function(s){ return /bpo/i.test(s); }) || '';
+/* Option in «API-Nutzung», die als Kontaktwunsch gilt: die letzte */
+var API_LEAD = API_OPTIONS[API_OPTIONS.length-1] || '';
