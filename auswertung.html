@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Auswertung Kundenumfrage 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div class="intro">
+    <span class="eyebrow">Intern · Apriko</span>
+    <h1>Auswertung Kundenumfrage 2026</h1>
+    <p class="muted">Sammeln Sie hier die Antwort-Codes aus den Kunden-Mails. Alles läuft lokal in Ihrem Browser.</p>
+  </div></header>
+  <div class="panel">
+    <div class="panel-head"><h2>Antwort-Codes einfügen</h2>
+      <p class="muted">Kopieren Sie die Codes aus den E-Mails hierher. Ganze Mails gehen auch, die Codes werden automatisch erkannt. Doppelte Codes zählen nur einmal.</p></div>
+    <div class="field"><label for="codes">Codes oder E-Mail-Texte</label><textarea id="codes" style="min-height:140px;font-family:var(--f-mono);font-size:13px" placeholder="APK1:…"></textarea></div>
+    <div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="addCodes">Hinzufügen</button><button type="button" class="btn ghost" id="clearCodes">Alle entfernen</button><span class="note" id="fileInfo"></span></div>
+    <div id="confirmClear" class="msg err" hidden><b>Alle gespeicherten Codes aus diesem Browser entfernen?</b><div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="clearYes">Ja, entfernen</button><button type="button" class="btn ghost" id="clearNo">Abbrechen</button></div></div>
+    <p class="note">Die Codes bleiben nur in diesem Browser gespeichert, nichts wird hochgeladen. Für eine Sicherung: unten «CSV herunterladen» oder die Codes in einer Textdatei aufbewahren.</p>
+  </div>
+  <section id="results" class="wrap"></section>
+</div>
+<script src="code.js"></script>
+<script src="fragen.js"></script>
+<script>
+(function(){
+"use strict";
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+/* ---------- Auswertung (nur Inhaber) ---------- */
+const results = document.getElementById("results");
+function avg(arr){ const v = arr.filter(x=>x!=null&&x!=="na"&&x!=="").map(Number); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; }
+function color(v,max){ const r=v/max; return r>=.75?"var(--good)":r>=.55?"var(--warn)":"var(--bad)"; }
+let latest = [];
+function renderResults(){
+  const R = latest, n = R.length;
+  if(!n){ results.innerHTML = `<div class="panel"><div class="panel-head"><span class="eyebrow">Auswertung</span><h2>Noch keine Antworten</h2><p class="muted">Fügen Sie oben die Antwort-Codes aus den Kunden-Mails ein. Danach erscheinen hier NPS, Bewertungen pro Bereich, die Roadmap-Rangliste und alle Kommentare.</p></div></div>`; return; }
+  const nps = R.map(r=>r.answers.nps).filter(x=>x!=null).map(Number);
+  const pro = nps.filter(x=>x>=9).length, det = nps.filter(x=>x<=6).length;
+  const npsScore = nps.length? Math.round((pro-det)/nps.length*100) : null;
+  const gt = avg(R.map(r=>r.answers.g_total));
+  const cb = R.filter(r=>r.answers.callback).length;
+  let html = `<div class="kpis">
+    <div class="kpi"><span>Antworten</span><b>${n}</b></div>
+    <div class="kpi"><span>NPS (−100 bis +100)</span><b>${npsScore==null?'–':(npsScore>0?'+':'')+npsScore}</b></div>
+    <div class="kpi"><span>Gesamtzufriedenheit Ø</span><b>${gt==null?'–':gt.toFixed(1)}</b></div>
+    <div class="kpi"><span>Gesprächswunsch</span><b>${cb}</b></div></div>`;
+  SECTIONS.filter(s=>s.items).forEach(s=>{
+    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Bewertung 1–5</span><h2>${esc(s.title)}</h2></div><div>`;
+    s.items.forEach(([k,l])=>{ const vals = R.map(r=>r.answers[k]); const a = avg(vals); const cnt = vals.filter(x=>x&&x!=="na").length;
+      html += `<div class="hbar"><span>${esc(l)} <span class="muted">(${cnt})</span></span><span class="track"><i style="width:${a?((a-1)/4*100).toFixed(0):0}%;background:${a?color(a,5):'transparent'}"></i></span><span class="v">${a==null?'–':a.toFixed(1)}</span></div>`; });
+    const cs = R.filter(r=>r.answers["c_"+s.id]);
+    html += `</div>${cs.length?`<div><h3>Kommentare</h3>${cs.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers["c_"+s.id])}</div>`).join("")}</div>`:''}</div>`;
+  });
+  // Roadmap: Punkte = (11 - Rang), min 1 → Top-Plätze zählen mehr
+  const score = {}, votes = {}, own = [];
+  R.forEach(r=>(r.roadmap||[]).forEach(x=>{ if(x.own){ own.push({t:x.title,f:r.answers.firma,rank:x.rank}); return; }
+    score[x.title]=(score[x.title]||0)+Math.max(1,11-x.rank); votes[x.title]=(votes[x.title]||0)+1; }));
+  const ranked = Object.entries(score).sort((a,b)=>b[1]-a[1]); const mx = ranked.length? ranked[0][1] : 1;
+  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Roadmap</span><h2>Gewünschte Themen</h2><p class="note">Punkte: Platz 1 = 10, Platz 2 = 9 … ab Platz 10 je 1 Punkt. In Klammern: Anzahl Nennungen.</p></div><div>${
+    ranked.map(([t,s])=>`<div class="hbar"><span>${esc(t)} <span class="muted">(${votes[t]})</span></span><span class="track"><i style="width:${(s/mx*100).toFixed(0)}%;background:var(--accent)"></i></span><span class="v">${s}</span></div>`).join("")||'<p class="muted">Noch keine Priorisierungen.</p>'}</div>
+    ${own.length?`<div><h3>Eigene Themen der Kunden</h3>${own.map(o=>`<div class="comment"><div class="who">${esc(o.f||'anonym')} · Platz ${o.rank}</div>${esc(o.t)}</div>`).join("")}</div>`:''}</div>`;
+  const bi = {}; R.forEach(r=>(r.answers.bpo_interest||[]).forEach(x=>bi[x]=(bi[x]||0)+1));
+  const bie = Object.entries(bi).sort((a,b)=>b[1]-a[1]);
+  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Potenzial</span><h2>Interesse an BPO-Leistungen</h2></div><div>${bie.map(([t,c])=>`<div class="hbar"><span>${esc(t)}</span><span class="track"><i style="width:${(c/n*100).toFixed(0)}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`).join("")||'<p class="muted">Keine Angaben.</p>'}</div></div>`;
+  const txt = (k,t)=>{ const cs = R.filter(r=>r.answers[k]); return cs.length?`<div><h3>${t}</h3>${cs.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers[k])}</div>`).join("")}</div>`:''; };
+  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Freitext</span><h2>Stimmen</h2></div>${txt("g_best","Was Kunden schätzen")}${txt("g_improve","Was wir verbessern sollen")}${
+    cb?`<div><h3>Gesprächswünsche</h3>${R.filter(r=>r.answers.callback).map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')}</div>${esc(r.answers.kname||'')} · ${esc(r.answers.kmail||'')}</div>`).join("")}</div>`:''}</div>`;
+  html += `<div class="panel"><div class="panel-head"><h2>Rohdaten</h2><p class="note">Alle Antworten als CSV (Semikolon-getrennt, für Excel).</p></div>
+    <div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="csvSave">CSV herunterladen</button><button type="button" class="btn ghost" id="csvCopy">CSV kopieren</button><span class="note" id="csvNote"></span></div></div>`;
+  results.innerHTML = html;
+  document.getElementById("csvCopy").onclick = async ()=>{ const note=document.getElementById("csvNote"); try{ await navigator.clipboard.writeText(toCsv()); note.textContent="CSV kopiert."; }catch(e){ note.textContent="Kopieren nicht möglich, bitte Download verwenden."; } };
+  document.getElementById("csvSave").onclick = ()=>{
+    const blob = new Blob(["\uFEFF"+toCsv()],{type:"text/csv;charset=utf-8"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "apriko-kundenumfrage-2026.csv";
+    document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500); };
+}
+function toCsv(){
+  const keys = ["firma","rolle","seit","ma","services"]; SECTIONS.filter(s=>s.items).forEach(s=>{ s.items.forEach(i=>keys.push(i[0])); keys.push("c_"+s.id); });
+  keys.push("c_bpo","bpo_interest","c_roadmap","nps","g_total","g_preis","g_best","g_improve","callback","kname","kmail");
+  const q = v=>'"'+String(v==null?"":Array.isArray(v)?v.join(", "):v).replace(/"/g,'""')+'"';
+  const head = keys.concat(["roadmap","eingereicht"]);
+  const rows = latest.map(r=>keys.map(k=>q(r.answers[k])).concat([q((r.roadmap||[]).map(x=>x.rank+". "+x.title).join(" | ")), q(r.submittedAt)]).join(";"));
+  return [head.join(";")].concat(rows).join("\r\n");
+}
+
+
+/* ---------- Codes verwalten ---------- */
+const KEY = "apriko-umfrage-codes";
+let store = [];
+try{ store = JSON.parse(localStorage.getItem(KEY)||"[]"); }catch(e){ store = []; }
+const persist = ()=>{ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} };
+const info = document.getElementById("fileInfo");
+async function refresh(){
+  const r = await AntwortCode.extractAll(store.join("\n"));
+  latest = r.items.map(x=>x.data);
+  info.textContent = latest.length + " Antworten geladen";
+  renderResults();
+}
+document.getElementById("addCodes").onclick = async ()=>{
+  const ta = document.getElementById("codes");
+  const r = await AntwortCode.extractAll(ta.value);
+  let added = 0;
+  r.items.forEach(x=>{ if(!store.includes(x.code)){ store.push(x.code); added++; } });
+  persist();
+  const dup = r.items.length - added;
+  info.textContent = added + " neu" + (dup?`, ${dup} schon vorhanden`:"") + (r.bad?`, ${r.bad} unlesbar`:"") + (r.items.length||r.bad?"":" – kein Code gefunden");
+  if(added){ ta.value = ""; const keep = info.textContent; await refresh(); info.textContent = keep + " · total " + latest.length; }
+};
+document.getElementById("clearCodes").onclick = ()=>{ document.getElementById("confirmClear").hidden = false; };
+document.getElementById("clearNo").onclick = ()=>{ document.getElementById("confirmClear").hidden = true; };
+document.getElementById("clearYes").onclick = async ()=>{ store = []; persist(); document.getElementById("confirmClear").hidden = true; await refresh(); };
+refresh();
+})();
+</script>
+</body>
+</html>

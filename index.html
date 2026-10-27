@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Apriko Kundenumfrage 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="intro">
+      <span class="eyebrow">Kundenumfrage 2026 · ca. 8 Minuten</span>
+      <h1>Wie zufrieden sind Sie mit Apriko?</h1>
+      <p class="muted">Ihre Rückmeldung zu Software, Support und BPO-Services fliesst direkt in unsere Planung 2027 ein. Im Roadmap-Teil sortieren Sie selbst, was wir als Nächstes bauen sollen.</p>
+    </div>
+  </header>
+  <main id="survey" class="wrap" style="gap:16px">
+    <nav class="steps" id="steps" aria-label="Abschnitte"></nav>
+    <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
+    <form id="form" novalidate></form>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script src="fragen.js"></script>
+<script src="code.js"></script>
+<script>
+/* ====== KONFIGURATION ======
+   An diese Adresse schicken die Kunden ihren Antwort-Code. */
+var EMPFAENGER = "hello@apriko.com";
+</script>
+<script>
+(function(){
+"use strict";
+/* ---------- State ---------- */
+const DRAFT_KEY = "apriko-umfrage-entwurf";
+let state = {answers:{}, roadmap:{prio:[], custom:[]}};
+let step = 0, visited = new Set([0]);
+let sent = false;
+
+function loadDraft(){ try{ const s = localStorage.getItem(DRAFT_KEY); if(s){ const d = JSON.parse(s); if(d && d.answers) state = Object.assign(state,d);} }catch(e){} }
+function saveDraft(){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); }catch(e){} }
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY);}catch(e){} }
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const A = () => state.answers;
+const usesBpo = () => { const s = A().services||[]; return s.includes("BPO Lohnverarbeitung")||s.includes("Weitere BPO-Leistungen"); };
+const ACTIVE = () => SECTIONS.filter(s => s.id!=="bpo" || usesBpo());
+
+/* ---------- Render ---------- */
+const form = document.getElementById("form");
+const stepsEl = document.getElementById("steps");
+
+function renderSteps(){
+  stepsEl.innerHTML = ACTIVE().map((s,i)=>`<button type="button" data-i="${i}" class="${visited.has(i)&&i!==step?'done':''}" ${i===step?'aria-current="step"':''}><span class="n">${i+1}</span>${esc(s.title)}</button>`).join("") +
+    `<button type="button" data-i="${ACTIVE().length}" ${step===ACTIVE().length?'aria-current="step"':''}><span class="n">✓</span>Absenden</button>`;
+  document.getElementById("progress").style.width = (Math.min(step,ACTIVE().length)/ACTIVE().length*100)+"%";
+}
+stepsEl.addEventListener("click",e=>{const b=e.target.closest("button[data-i]"); if(b) go(+b.dataset.i);});
+
+function ratingRows(items){
+  return `<div class="legend" aria-hidden="true"><span></span><span>sehr<br>schlecht</span><span></span><span>neutral</span><span></span><span>sehr<br>gut</span><span>k. A.</span></div>
+  <p class="scale-hint">1 = sehr schlecht · 5 = sehr gut · k. A. = keine Angabe</p>` +
+  items.map(([k,l,h])=>{
+    const v = A()[k];
+    const opts = SCALE.map(n=>`<input type="radio" name="${k}" id="${k}_${n}" value="${n}" ${v===n?'checked':''}><label class="dot" for="${k}_${n}">${n}</label>`).join("") +
+      `<input type="radio" name="${k}" id="${k}_na" value="na" ${v==="na"?'checked':''}><label class="dot na" for="${k}_na">k. A.</label>`;
+    return `<div class="q" role="radiogroup" aria-labelledby="${k}_l"><div class="lbl" id="${k}_l">${esc(l)}${h?`<small>${esc(h)}</small>`:''}</div>${opts}</div>`;
+  }).join("");
+}
+function comment(id,label){ return `<div class="field"><label for="${id}">${esc(label)}</label><textarea id="${id}" name="${id}">${esc(A()[id]||"")}</textarea></div>`; }
+function navRow(){
+  return `<div class="nav"><button type="button" class="btn ghost" id="prev" ${step===0?'disabled':''}>Zurück</button><button type="button" class="btn primary" id="next">${step===ACTIVE().length-1?'Weiter zum Absenden':'Weiter'}</button></div>`;
+}
+
+function render(){
+  renderSteps();
+  if(step===ACTIVE().length){ renderSubmit(); return; }
+  const s = ACTIVE()[step];
+  let body = "";
+  const head = (t,lead)=>`<div class="panel-head"><span class="eyebrow">Abschnitt ${step+1} von ${ACTIVE().length}</span><h2>${esc(t)}</h2>${lead?`<p class="muted">${esc(lead)}</p>`:''}</div>`;
+  if(s.kind==="about"){
+    body = head("Über Sie","Damit wir die Antworten richtig einordnen können. Der Firmenname ist freiwillig.") + `
+    <div class="grid2">
+      <div class="field"><label for="firma">Firma <span class="muted">(optional)</span></label><input type="text" id="firma" name="firma" value="${esc(A().firma||'')}" autocomplete="organization"></div>
+      <div class="field"><label for="rolle">Ihre Funktion</label><select id="rolle" name="rolle"><option value="">Bitte wählen</option>${ROLES.map(r=>`<option ${A().rolle===r?'selected':''}>${r}</option>`).join("")}</select></div>
+      <div class="field"><label for="seit">Kunde von Apriko seit</label><select id="seit" name="seit"><option value="">Bitte wählen</option>${SINCE.map(r=>`<option ${A().seit===r?'selected':''}>${r}</option>`).join("")}</select></div>
+      <div class="field"><label for="ma">Anzahl Temporärmitarbeitende pro Monat (ca.)</label><select id="ma" name="ma"><option value="">Bitte wählen</option>${["bis 50","51–200","201–500","über 500"].map(r=>`<option ${A().ma===r?'selected':''}>${r}</option>`).join("")}</select></div>
+    </div>
+    <div class="field"><span class="label">Welche Leistungen nutzen Sie?</span><div class="checks">${SERVICES.map((x,i)=>`<label><input type="checkbox" name="services" value="${esc(x)}" id="svc${i}" ${(A().services||[]).includes(x)?'checked':''}>${esc(x)}</label>`).join("")}</div></div>`;
+  } else if(s.kind==="rating"){
+    body = head(s.title,s.lead) + `<div>${ratingRows(s.items)}</div>` + comment("c_"+s.id,"Was möchten Sie uns dazu noch sagen?");
+  } else if(s.kind==="bpo"){
+    body = head(s.title,s.lead) + `<div>${ratingRows(s.items)}</div>` + `<div class="field"><span class="label">Welche Prozesse könnten Sie sich vorstellen, (zusätzlich) an Apriko auszulagern?</span><div class="checks">${BPO_OPTIONS.map((x,i)=>`<label><input type="checkbox" name="bpo_interest" id="bi${i}" value="${esc(x)}" ${(A().bpo_interest||[]).includes(x)?'checked':''}>${esc(x)}</label>`).join("")}</div></div>` + comment("c_bpo","Anmerkungen zu BPO");
+  } else if(s.kind==="roadmap"){
+    body = head("Ihre Wunsch-Roadmap","Ziehen Sie die Themen, die Ihnen wichtig sind, nach rechts und sortieren Sie sie: oben steht, was wir zuerst bauen sollen. Eigene Themen fügen Sie unten hinzu.") + `
+    <div class="board">
+      <div class="col">
+        <div class="col-head"><h3>Themen</h3><span class="note">antippen oder ziehen</span></div>
+        <div class="zone pool" id="pool" data-empty="Alle Themen sind priorisiert."></div>
+      </div>
+      <div class="col">
+        <div class="col-head"><h3>Ihre Prioritäten</h3><span class="note" id="prioCount"></span></div>
+        <div class="zone prio" id="prio" data-empty="Themen hierher ziehen. Platz 1 = am wichtigsten."></div>
+      </div>
+    </div>
+    <div class="field"><label for="newTopic">Eigenes Thema hinzufügen</label>
+      <div class="addrow"><input type="text" id="newTopic" maxlength="80" placeholder="z. B. Schnittstelle zu unserem Zeiterfassungssystem"><button type="button" class="btn primary" id="addTopic">Hinzufügen</button></div>
+      <span class="note">Eigene Themen landen direkt in Ihren Prioritäten.</span></div>` + comment("c_roadmap","Möchten Sie eines der Themen genauer beschreiben?");
+  } else if(s.kind==="overall"){
+    const n = A().nps;
+    body = head("Gesamteindruck","") + `
+    <div class="field"><span class="label" id="nps_l">Wie wahrscheinlich ist es, dass Sie Apriko einem Geschäftskontakt weiterempfehlen?</span>
+      <div class="nps" role="radiogroup" aria-labelledby="nps_l">${Array.from({length:11},(_,i)=>`<input type="radio" name="nps" id="nps_${i}" value="${i}" ${n===String(i)?'checked':''}><label for="nps_${i}">${i}</label>`).join("")}</div>
+      <div class="nps-ends"><span>0 = gar nicht wahrscheinlich</span><span>10 = äusserst wahrscheinlich</span></div></div>
+    <div>${ratingRows([["g_total","Gesamtzufriedenheit mit Apriko",""],["g_preis","Preis-Leistungs-Verhältnis Software",""]])}</div>
+    ${comment("g_best","Was schätzen Sie an Apriko am meisten?")}
+    ${comment("g_improve","Was sollten wir als Erstes verbessern?")}
+    <div class="field"><div class="checks"><label><input type="checkbox" id="callback" name="callback" ${A().callback?'checked':''}>Ich wünsche mir ein persönliches Gespräch zu meinem Feedback</label></div></div>
+    <div class="grid2" id="contactFields" ${A().callback?'':'hidden'}>
+      <div class="field"><label for="kname">Name</label><input type="text" id="kname" name="kname" value="${esc(A().kname||'')}" autocomplete="name"></div>
+      <div class="field"><label for="kmail">E-Mail oder Telefon</label><input type="text" id="kmail" name="kmail" value="${esc(A().kmail||'')}" autocomplete="email"></div>
+    </div>`;
+  }
+  form.innerHTML = `<div class="panel">${body}${navRow()}</div>`;
+  bindPanel();
+  if(s.kind==="roadmap") renderBoard();
+}
+
+function bindPanel(){
+  const p = document.getElementById("prev"), n = document.getElementById("next");
+  if(p) p.onclick = ()=>go(step-1);
+  if(n) n.onclick = ()=>go(step+1);
+  const cb = document.getElementById("callback");
+  if(cb) cb.addEventListener("change",()=>{document.getElementById("contactFields").hidden=!cb.checked;});
+}
+
+form.addEventListener("input", collect);
+form.addEventListener("change", collect);
+form.addEventListener("submit", e=>e.preventDefault());
+function collect(e){
+  const t = e.target; if(!t.name) return;
+  if(t.type==="checkbox" && t.name!=="callback"){
+    A()[t.name] = [...form.querySelectorAll(`input[name="${t.name}"]:checked`)].map(x=>x.value);
+  } else if(t.type==="checkbox"){ A()[t.name] = t.checked; }
+  else if(t.type==="radio"){ if(t.checked) A()[t.name] = t.value; }
+  else A()[t.name] = t.value;
+  if(t.name==="services") renderSteps();
+  saveDraft();
+}
+
+/* ---------- Roadmap board ---------- */
+function topicById(id){ const t = TOPICS.find(x=>x[0]===id); if(t) return {id,title:t[1],hint:t[2],own:false}; const c = state.roadmap.custom.find(x=>x.id===id); return c?{id,title:c.title,hint:"",own:true}:null; }
+function cardHtml(t){
+  return `<div class="card" data-id="${esc(t.id)}"><span class="rank"></span><span class="grip" aria-hidden="true">⋮⋮</span>
+   <span class="t">${esc(t.title)}${t.own?` <span class="own">eigenes</span>`:''}${t.hint?`<small>${esc(t.hint)}</small>`:''}</span>
+   <button type="button" class="ibtn add" aria-label="${esc(t.title)} priorisieren" title="Zu Prioritäten">+</button>
+   <button type="button" class="ibtn up" aria-label="nach oben" title="Nach oben">↑</button>
+   <button type="button" class="ibtn down" aria-label="nach unten" title="Nach unten">↓</button>
+   <button type="button" class="ibtn rm" aria-label="entfernen" title="Entfernen">×</button></div>`;
+}
+function renderBoard(){
+  const pool = document.getElementById("pool"), prio = document.getElementById("prio");
+  state.roadmap.prio = state.roadmap.prio.filter(id=>topicById(id));
+  prio.innerHTML = state.roadmap.prio.map(id=>cardHtml(topicById(id))).join("");
+  pool.innerHTML = TOPICS.filter(t=>!state.roadmap.prio.includes(t[0])).map(t=>cardHtml(topicById(t[0]))).join("");
+  numberPrio();
+  if(window.Sortable){
+    const opts = {group:"roadmap",animation:150,ghostClass:"sortable-ghost",chosenClass:"sortable-chosen",filter:".ibtn",preventOnFilter:false,onSort:syncFromDom};
+    Sortable.create(pool,Object.assign({sort:false},opts));
+    Sortable.create(prio,opts);
+  }
+  const board = document.querySelector(".board");
+  board.onclick = e=>{
+    const b = e.target.closest(".ibtn"); if(!b) return;
+    const id = b.closest(".card").dataset.id; const P = state.roadmap.prio; const i = P.indexOf(id);
+    if(b.classList.contains("add")) P.push(id);
+    else if(b.classList.contains("rm")){ P.splice(i,1); if(topicById(id).own) state.roadmap.custom = state.roadmap.custom.filter(c=>c.id!==id); }
+    else if(b.classList.contains("up") && i>0){ [P[i-1],P[i]]=[P[i],P[i-1]]; }
+    else if(b.classList.contains("down") && i<P.length-1){ [P[i+1],P[i]]=[P[i],P[i+1]]; }
+    saveDraft(); renderBoard();
+    const again = document.querySelector(`#prio .card[data-id="${CSS.escape(id)}"] .${b.classList.contains('add')?'rm':[...b.classList].find(c=>c!=='ibtn')}`); if(again) again.focus();
+  };
+  const add = ()=>{
+    const inp = document.getElementById("newTopic"); const v = inp.value.trim(); if(!v) return;
+    const id = "own_"+Date.now().toString(36);
+    state.roadmap.custom.push({id,title:v}); state.roadmap.prio.push(id); inp.value=""; saveDraft(); renderBoard(); inp.focus();
+  };
+  document.getElementById("addTopic").onclick = add;
+  document.getElementById("newTopic").onkeydown = e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } };
+}
+function numberPrio(){
+  const cards = document.querySelectorAll("#prio .card");
+  cards.forEach((c,i)=>c.querySelector(".rank").textContent=i+1);
+  const pc = document.getElementById("prioCount"); if(pc) pc.textContent = cards.length? cards.length+" priorisiert":"";
+}
+function syncFromDom(){
+  state.roadmap.prio = [...document.querySelectorAll("#prio .card")].map(c=>c.dataset.id);
+  // eigenes Thema zurück in den Pool gezogen = entfernen
+  const back = [...document.querySelectorAll("#pool .card")].filter(c=>c.dataset.id.startsWith("own_"));
+  back.forEach(c=>{ state.roadmap.custom = state.roadmap.custom.filter(x=>x.id!==c.dataset.id); c.remove(); });
+  numberPrio(); saveDraft();
+}
+
+/* ---------- Submit ---------- */
+function buildPayload(){
+  const answers = JSON.parse(JSON.stringify(A()));
+  if(!usesBpo()) Object.keys(answers).filter(k=>/^b_/.test(k)||k==="c_bpo"||k==="bpo_interest").forEach(k=>delete answers[k]);
+  return {
+    answers,
+    roadmap: state.roadmap.prio.map((id,i)=>{const t=topicById(id); return {rank:i+1,id,title:t.title,own:t.own};}),
+    submittedAt: new Date().toISOString(), version: 1
+  };
+}
+function plainText(p){
+  const a = p.answers, L = [];
+  L.push("Apriko Kundenumfrage 2026"); L.push("Firma: "+(a.firma||"(anonym)")); L.push("Funktion: "+(a.rolle||"-")+" | Kunde seit: "+(a.seit||"-"));
+  ACTIVE().filter(s=>s.items).forEach(s=>{ L.push("\n"+s.title.toUpperCase()); s.items.forEach(([k,l])=>L.push("  "+l+": "+(a[k]==="na"?"k. A.":(a[k]||"-")))); if(a["c_"+s.id]) L.push("  Kommentar: "+a["c_"+s.id]); });
+  if((a.bpo_interest||[]).length) L.push("Interesse BPO: "+a.bpo_interest.join(", "));
+  L.push("\nROADMAP"); p.roadmap.forEach(r=>L.push("  "+r.rank+". "+r.title+(r.own?" (eigenes Thema)":"")));
+  L.push("\nEmpfehlung (0–10): "+(a.nps??"-")+" | Gesamt: "+(a.g_total||"-"));
+  if(a.g_best) L.push("Schätzen: "+a.g_best); if(a.g_improve) L.push("Verbessern: "+a.g_improve);
+  if(a.callback) L.push("Gesprächswunsch: "+(a.kname||"")+" "+(a.kmail||""));
+  return L.join("\n");
+}
+function missing(){
+  const m = [];
+  if(!A().rolle) m.push("Ihre Funktion (Abschnitt 1)");
+  if(A().nps==null) m.push("Weiterempfehlung 0–10 (Gesamteindruck)");
+  return m;
+}
+function renderSubmit(){
+  const m = missing(), p = buildPayload();
+  const rated = Object.keys(A()).filter(k=>/^[qfsbg]_/.test(k)).length;
+  form.innerHTML = `<div class="panel">
+    <div class="panel-head"><span class="eyebrow">Fast geschafft</span><h2>Antworten absenden</h2>
+    <p class="muted">${rated} Bewertungen, ${p.roadmap.length} Roadmap-Prioritäten${A().firma?`, Firma: ${esc(A().firma)}`:', ohne Firmenangabe'}.</p></div>
+    ${m.length?`<div class="msg err"><b>Bitte noch ergänzen:</b><span>${m.map(esc).join("<br>")}</span></div>`:''}
+    <div id="submitArea"></div>
+    <div class="nav"><button type="button" class="btn ghost" id="prev">Zurück</button><button type="button" class="btn primary" id="send" ${m.length?'disabled':''}>Antworten senden</button></div>
+  </div>`;
+  document.getElementById("prev").onclick = ()=>go(step-1);
+  document.getElementById("send").onclick = send;
+}
+async function send(){
+  const btn = document.getElementById("send"), area = document.getElementById("submitArea");
+  btn.disabled = true; btn.textContent = "Code wird erstellt …";
+  const p = buildPayload();
+  let code;
+  try{ code = await AntwortCode.encode(p); }
+  catch(e){ btn.disabled = false; btn.textContent = "Antworten senden"; area.innerHTML = `<div class="msg err">Der Antwort-Code konnte nicht erstellt werden. Bitte versuchen Sie es mit einem aktuellen Browser erneut.</div>`; return; }
+  clearDraft();
+  const firma = (p.answers.firma||"").trim();
+  const subject = "Kundenumfrage 2026" + (firma ? " – " + firma : "");
+  const body = "Guten Tag\n\nHier sind unsere Antworten zur Apriko-Kundenumfrage 2026.\n\n" + code + "\n\nFreundliche Grüsse";
+  const mailto = "mailto:" + EMPFAENGER + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+  area.innerHTML = `<div class="msg ok">
+    <b>Fast fertig: Bitte senden Sie uns jetzt Ihren Antwort-Code.</b>
+    <span>Ein Klick auf «Per E-Mail senden» öffnet Ihr Mailprogramm mit einer fertigen Nachricht an <b style="user-select:all">${esc(EMPFAENGER)}</b>. Sie müssen nur noch auf Senden klicken.</span>
+    <div class="nav" style="justify-content:flex-start">
+      <a class="btn primary" id="mailBtn" href="${esc(mailto)}" style="text-decoration:none">Per E-Mail senden</a>
+      <button type="button" class="btn ghost" id="copyBtn">Code kopieren</button>
+    </div>
+    <span class="note">Falls sich kein Mailprogramm öffnet: Code kopieren und in eine E-Mail an ${esc(EMPFAENGER)} einfügen.</span>
+    <div class="copybox" id="copybox">${esc(code)}</div>
+    <span class="note" id="copyNote"></span>
+  </div>`;
+  btn.hidden = true;
+  if(mailto.length > 1900){ document.querySelector("#submitArea .msg .note").textContent = "Ihre Antworten sind sehr ausführlich. Falls die E-Mail unvollständig erscheint: Code kopieren und in eine E-Mail an " + EMPFAENGER + " einfügen."; }
+  document.getElementById("copyBtn").onclick = async ()=>{
+    const note = document.getElementById("copyNote");
+    try{ await navigator.clipboard.writeText(code); note.textContent = "Code kopiert."; }
+    catch(e){ const r = document.createRange(); r.selectNodeContents(document.getElementById("copybox")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); note.textContent = "Code markiert, bitte mit Ctrl/Cmd+C kopieren."; }
+  };
+  document.getElementById("mailBtn").addEventListener("click",()=>{ document.getElementById("copyNote").textContent = "Ihr Mailprogramm sollte sich jetzt öffnen. Vielen Dank für Ihre Teilnahme!"; });
+}
+function go(i){
+  if(i<0||i>ACTIVE().length) return;
+  step = i; visited.add(i); render();
+  document.getElementById("survey").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+
+loadDraft(); render();
+})();
+</script>
+</body>
+</html>
