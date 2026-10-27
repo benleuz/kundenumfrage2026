@@ -11,7 +11,6 @@ var TEXTE = {
  "kommentar_bereich": "Was möchtest du uns dazu noch sagen?",
  "api_frage": "Wusstest du, dass du über unsere offene API praktisch jedes System an Apriko anbinden kannst?",
  "api_kommentar": "Welche Systeme würdest du gerne anbinden? (z. B. Zeiterfassung, Buchhaltung, Jobportale)",
- "bpo_interesse": "Welche Prozesse könntest du dir vorstellen, (zusätzlich) an Apriko auszulagern?",
  "bpo_kommentar": "Anmerkungen zu BPO",
  "roadmap_titel": "Deine Wunsch-Roadmap",
  "roadmap_intro": "Welche drei Themen sollen wir als Nächstes bauen? Zieh deine Top 3 nach rechts und sortiere sie: Platz 1 ist am wichtigsten. Fehlt dein Thema, füg es unten hinzu.",
@@ -261,7 +260,7 @@ var ROLES = ["Geschäftsleitung", "Disposition / Recruiting", "Lohn / Administra
 var SINCE = ["weniger als 1 Jahr", "1–2 Jahre", "3–5 Jahre", "mehr als 5 Jahre"];
 var MA = ["bis 50", "51–200", "201–500", "über 500"];
 var SERVICES = ["Software", "BPO Lohn- und Debitoren"];
-var BPO_OPTIONS = ["Lohnverarbeitung", "Quellensteuer-Abrechnung", "Behördenmeldungen (AHV, SUVA, BVG)", "Debitorenbuchhaltung und Mahnwesen", "Kreditoren und Zahlungsverkehr", "Rapporterfassung", "Bewerber-Vorselektion", "Jahresabschluss-Unterstützung"];
+var BPO_OPTIONS = [];
 var FORTSCHRITT = ["Ja, deutlich", "Ja, etwas", "Kaum", "Nein", "Kann ich nicht beurteilen"];
 var API_OPTIONS = ["Ja, und wir nutzen das bereits", "Ja, aber wir nutzen es (noch) nicht", "Nein, das war mir nicht bewusst", "Klingt spannend, bitte meldet euch bei uns"];
 /* Option in «Leistungen», die den BPO-Abschnitt einblendet: die erste, die «BPO» enthält */

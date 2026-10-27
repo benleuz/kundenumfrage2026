@@ -30,6 +30,10 @@
 /* ====== KONFIGURATION ======
    An diese Adresse schicken die Kunden ihren Antwort-Code. */
 var EMPFAENGER = T("empfaenger","hello@apriko.com");
+/* Supabase: Antworten direkt speichern. Der Schlüssel ist öffentlich und darf nur EINFÜGEN (Row Level Security). */
+var SUPABASE_URL = "https://doidwhwjmdqnazcullsq.supabase.co";
+var SUPABASE_KEY = "sb_publishable_-CChsDaC2wuqOCF5VobHfQ_LG02deLD";
+var UMFRAGE_ID   = "kundenumfrage-2026";
 </script>
 <script>
 (function(){
@@ -154,7 +158,7 @@ function collect(e){
   } else if(t.type==="checkbox"){ A()[t.name] = t.checked; }
   else if(t.type==="radio"){ if(t.checked) A()[t.name] = t.value; }
   else A()[t.name] = t.value;
-  if(t.name==="services") renderSteps();
+  if(t.name==="services"){ renderSteps(); const eb = form.querySelector(".panel-head .eyebrow"); if(eb) eb.textContent = "Abschnitt " + (step+1) + " von " + ACTIVE().length; }
   saveDraft();
 }
 
@@ -267,8 +271,28 @@ function renderSubmit(){
 }
 async function send(){
   const btn = document.getElementById("send"), area = document.getElementById("submitArea");
-  btn.disabled = true; btn.textContent = "Code wird erstellt …";
+  btn.disabled = true; btn.textContent = "Wird gesendet …";
   const p = buildPayload();
+  // 1) Direkt in Supabase speichern
+  if(SUPABASE_URL && SUPABASE_KEY){
+    try{
+      const ctl = new AbortController(); const to = setTimeout(()=>ctl.abort(), 15000);
+      const r = await fetch(SUPABASE_URL + "/rest/v1/umfrage_antworten", {
+        method:"POST", signal: ctl.signal,
+        headers:{ "apikey": SUPABASE_KEY, "Content-Type":"application/json", "Prefer":"return=minimal" },
+        body: JSON.stringify({ umfrage: UMFRAGE_ID, firma: (p.answers.firma||"").trim() || null, payload: p })
+      });
+      clearTimeout(to);
+      if(r.ok){
+        clearDraft(); sent = true;
+        area.innerHTML = `<div class="msg ok"><b>Vielen Dank! Deine Antworten sind bei uns angekommen.</b><span class="muted">Du kannst dieses Fenster jetzt schliessen.</span></div>`;
+        btn.hidden = true; const pv = document.getElementById("prev"); if(pv) pv.hidden = true;
+        return;
+      }
+    }catch(e){}
+  }
+  // 2) Rückfall: Antwort-Code per Mail
+  btn.textContent = "Code wird erstellt …";
   let code;
   try{ code = await AntwortCode.encode(p); }
   catch(e){ btn.disabled = false; btn.textContent = "Antworten senden"; area.innerHTML = `<div class="msg err">Der Antwort-Code konnte nicht erstellt werden. Bitte versuch es mit einem aktuellen Browser erneut.</div>`; return; }
@@ -278,7 +302,7 @@ async function send(){
   const body = T("mail_anrede","Hallo") + "\n\n" + T("mail_text") + "\n\n" + code + "\n\n" + T("mail_gruss","Liebe Grüsse");
   const mailto = "mailto:" + EMPFAENGER + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
   area.innerHTML = `<div class="msg ok">
-    <b>Fast fertig: Bitte schick uns jetzt deinen Antwort-Code.</b>
+    <b>Die direkte Übermittlung hat nicht geklappt. Bitte schick uns deinen Antwort-Code per E-Mail.</b>
     <span>Ein Klick auf «Per E-Mail senden» öffnet dein Mailprogramm mit einer fertigen Nachricht an <b style="user-select:all">${esc(EMPFAENGER)}</b>. Du musst nur noch auf Senden klicken.</span>
     <div class="nav" style="justify-content:flex-start">
       <a class="btn primary" id="mailBtn" href="${esc(mailto)}" style="text-decoration:none">Per E-Mail senden</a>

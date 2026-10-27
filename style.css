@@ -179,3 +179,33 @@ body > .wrap{padding-top:24px}
 .msg.ok{border-color:var(--good)}
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--good);outline-offset:2px}
 .card .t{overflow-wrap:anywhere}
+
+/* ===== Responsiv: Breiten-Fixes ===== */
+html,body{margin:0}
+html{overflow-x:hidden}               /* Sicherheitsnetz gegen 1-px-Überstände */
+.wrap{width:100%;min-width:0}
+.wrap > *, .panel > *, .col, .field, .grid2 > *{min-width:0}
+.steps{max-width:100%;scrollbar-width:none}
+.steps::-webkit-scrollbar{display:none}
+/* Kopfbalken: volle Breite ohne negative Ränder */
+.brandbar{margin-left:calc(-1 * max(16px, env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(16px, env(safe-area-inset-right,0px)));width:auto}
+@media (max-width:620px){
+  .panel{padding:18px 14px}
+  .nps{grid-template-columns:repeat(6,1fr)}
+  .nps label{height:40px}
+  .nps-ends{flex-direction:column;gap:2px}
+  .q{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .q label.dot{height:40px;font-size:13px}
+  .card{padding:8px 6px 8px 8px;gap:6px}
+  .ibtn{width:34px;height:34px}
+  .nav .btn{flex:1}
+  .addrow{flex-direction:column}
+  h1{font-size:28px}
+  .hbar{grid-template-columns:minmax(0,1fr) 64px 36px}
+}
+.card .t{overflow-wrap:break-word;hyphens:auto;-webkit-hyphens:auto}
+@media (max-width:620px){
+  .card .grip{display:none}
+  .card .t{font-size:14px}
+  .card .t small{font-size:12px}
+}

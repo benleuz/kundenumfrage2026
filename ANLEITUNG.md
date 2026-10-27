@@ -1,6 +1,13 @@
 # Apriko Kundenumfrage 2026 – Einrichtung
 
-Kein Server, keine Lizenz: Die Umfrage läuft komplett im Browser des Kunden. Am Ende entsteht ein **Antwort-Code**, den der Kunde dir per E-Mail schickt. Die Codes fügst du in die Auswertung ein.
+Die Antworten werden beim Absenden direkt in **Supabase** gespeichert (Projekt «Apriko CRM», Tabelle `umfrage_antworten`). Klappt das beim Kunden ausnahmsweise nicht, erscheint als Rückfall ein **Antwort-Code**, den er per E-Mail schickt.
+
+## Supabase
+
+- Der Schlüssel in `index.html` / `auswertung.html` ist der **öffentliche** (publishable) Schlüssel. Er darf laut Zugriffsregeln nur **neue Antworten einfügen** – nicht lesen, ändern oder löschen.
+- **Lesen** darf nur, wer mit `benjamin@apriko.com` angemeldet ist. Weitere Personen: Regel «Umfrage: nur Auswerter lesen» in Supabase um deren E-Mail ergänzen.
+- **Einmalig nötig:** In Supabase unter *Authentication → Users → Add user → Create new user* den Benutzer `benjamin@apriko.com` mit Passwort anlegen und «Auto Confirm User» anhaken. Mit diesem Login meldest du dich in der Auswertung an.
+- Den **service_role**- bzw. **secret**-Schlüssel nie in eine Webseite einbauen.
 
 ## Dateien
 
@@ -30,8 +37,8 @@ Fragen und Texte änderst du in **Kundenumfrage-2026-Fragen.xlsx** (Blatt «Text
 
 ## Auswerten
 
-1. `auswertung.html` öffnen (auf GitHub Pages oder lokal per Doppelklick).
-2. Codes oder ganze Mail-Texte ins Feld kopieren → «Hinzufügen». Mehrere Codes auf einmal gehen auch.
+1. `auswertung.html` öffnen und mit deinem Supabase-Login anmelden – alle Antworten werden geladen («Neu laden» für den aktuellen Stand).
+2. Nur falls ein Kunde einen Code gemailt hat: Code oder ganze Mail ins Feld kopieren → «Hinzufügen».
 3. Doppelte Codes zählen nur einmal. Die Codes bleiben in diesem Browser gespeichert – du kannst laufend neue dazulegen.
 4. «CSV herunterladen» für Excel.
 
@@ -39,8 +46,8 @@ Die Codes sind nur in dem Browser gespeichert, in dem du sie eingefügt hast. Be
 
 ## Gut zu wissen
 
-- **Rücklauf:** Der Kunde muss die Mail selbst abschicken. Wer das vergisst, fehlt in der Auswertung. Ein kurzer Reminder nach ein paar Tagen hilft.
-- **Datenschutz:** Die Antworten liegen nirgends auf einem Server, nur in den Mails an dich.
+- **Rücklauf:** Nur im Rückfall-Fall (Code per Mail) muss der Kunde selbst etwas abschicken.
+- **Datenschutz:** Die Antworten liegen in deinem Supabase-Projekt (Region London, eu-west-2).
 - **Ändern der Fragen während der Umfrage:** Antworten bleiben lesbar, solange die Schlüssel in `fragen.js` (z. B. `q_stab`) gleich bleiben. Neue Fragen erscheinen in der Auswertung erst ab den neuen Antworten.
 
 ## Auswertung – wie gerechnet wird
