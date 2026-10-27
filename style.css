@@ -209,3 +209,29 @@ html{overflow-x:hidden}               /* Sicherheitsnetz gegen 1-px-Überstände
   .card .t{font-size:14px}
   .card .t small{font-size:12px}
 }
+
+/* ===== Schrittleiste: nie abschneiden ===== */
+.steps{flex-wrap:wrap;overflow:visible;padding-bottom:0}
+@media (max-width:620px){
+  .steps{gap:4px;flex-wrap:nowrap;justify-content:space-between}
+  .steps button{padding:6px;gap:0;flex:0 0 auto}
+  .steps button .lbl{display:none}
+  .steps button[aria-current="step"]{border-width:2px}
+}
+@media (max-width:359px){ .steps{flex-wrap:wrap;justify-content:flex-start} }
+
+/* ===== Schrittleiste Desktop: eine Zeile, gleichmässig verteilt ===== */
+.wrap{max-width:900px}
+.brandbar .inner{max-width:900px}
+@media (min-width:621px){
+  .steps{flex-wrap:nowrap;gap:6px}
+  .steps button{flex:1 1 auto;min-width:0;justify-content:center;padding:7px 10px;gap:6px}
+  .steps button .n{flex:0 0 auto}
+  .steps button .lbl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+@media (min-width:621px) and (max-width:899px){
+  .steps button{flex:0 0 auto;padding:6px}
+  .steps button .lbl{display:none}
+  .steps button[aria-current="step"]{flex:1 1 auto;padding:6px 10px}
+  .steps button[aria-current="step"] .lbl{display:inline}
+}

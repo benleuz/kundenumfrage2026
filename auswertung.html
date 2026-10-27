@@ -9,6 +9,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="style.css">
 <style>
+table.answers td{vertical-align:middle}
+table.answers td.act{white-space:nowrap;text-align:right}
+.btn.small{padding:5px 10px;font-size:13px}
+.confirm{font-size:13px}
 </style>
 </head>
 <body>
@@ -100,10 +104,37 @@ function renderResults(){
   const txt = (k,t)=>{ const cs = R.filter(r=>r.answers[k]); return cs.length?`<div><h3>${t}</h3>${cs.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers[k])}</div>`).join("")}</div>`:''; };
   html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Freitext</span><h2>Stimmen</h2></div>${txt("g_best","Was Kunden schätzen")}${txt("g_improve","Was wir verbessern sollen")}${
     cb?`<div><h3>Gesprächswünsche</h3>${R.filter(r=>r.answers.callback).map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')}</div>${esc(r.answers.kname||'')} · ${esc(r.answers.kmail||'')}</div>`).join("")}</div>`:''}</div>`;
+  // Einzelne Antworten mit Löschen
+  const fmt = d=>{ try{ return new Date(d).toLocaleString("de-CH",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } };
+  const sorted = R.map((r,i)=>({r,i})).sort((a,b)=>String(b.r._created||b.r.submittedAt||"").localeCompare(String(a.r._created||a.r.submittedAt||"")));
+  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Einzelne Antworten</span><h2>Alle Antworten (${n})</h2>
+    <p class="note">Tests oder Doppelte hier löschen, damit sie nicht in die Auswertung einfliessen. Gelöschte Datenbank-Antworten sind endgültig weg.</p></div>
+    <div class="tablewrap"><table class="answers"><thead><tr><th>Eingegangen</th><th>Firma</th><th>Funktion</th><th>NPS</th><th>Quelle</th><th></th></tr></thead><tbody>${
+    sorted.map(({r,i})=>`<tr data-i="${i}"><td>${esc(fmt(r._created||r.submittedAt))}</td><td>${esc(r.answers.firma||"anonym")}</td><td>${esc(r.answers.rolle||"")}</td><td>${esc(r.answers.nps??"")}</td><td>${r._src==="db"?"Datenbank":"Code"}</td>
+      <td class="act"><button type="button" class="btn ghost small del">Löschen</button><span class="confirm" hidden>Wirklich löschen? <button type="button" class="btn primary small yes">Ja, löschen</button> <button type="button" class="btn ghost small no">Abbrechen</button></span><span class="note st"></span></td></tr>`).join("")}</tbody></table></div></div>`;
   html += `<div class="panel"><div class="panel-head"><h2>Rohdaten</h2><p class="note">Alle Antworten als CSV (Semikolon-getrennt, für Excel).</p></div>
     <div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="csvSave">CSV herunterladen</button><button type="button" class="btn ghost" id="csvCopy">CSV kopieren</button><span class="note" id="csvNote"></span></div></div>`;
   results.innerHTML = html;
   document.getElementById("csvCopy").onclick = async ()=>{ const note=document.getElementById("csvNote"); try{ await navigator.clipboard.writeText(toCsv()); note.textContent="CSV kopiert."; }catch(e){ note.textContent="Kopieren nicht möglich, bitte Download verwenden."; } };
+  const tb = document.querySelector("table.answers");
+  if(tb) tb.onclick = async e=>{
+    const tr = e.target.closest("tr[data-i]"); if(!tr) return;
+    const rec = latest[+tr.dataset.i], conf = tr.querySelector(".confirm"), del = tr.querySelector(".del"), st = tr.querySelector(".st");
+    if(e.target.classList.contains("del")){ del.hidden = true; conf.hidden = false; tr.querySelector(".yes").focus(); return; }
+    if(e.target.classList.contains("no")){ conf.hidden = true; del.hidden = false; return; }
+    if(!e.target.classList.contains("yes")) return;
+    conf.hidden = true; st.textContent = "Lösche …";
+    if(rec._src === "code"){
+      store = store.filter(c=>c !== rec._code); persist(); await refresh(); return;
+    }
+    try{
+      const r = await fetch(SUPABASE_URL + "/rest/v1/umfrage_antworten?id=eq." + encodeURIComponent(rec._id),
+        { method:"DELETE", headers:{ "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token, "Prefer":"return=representation" } });
+      const gone = r.ok ? await r.json() : [];
+      if(!r.ok || !gone.length) throw new Error(r.status === 401 ? "Sitzung abgelaufen, bitte neu anmelden" : "nicht gelöscht");
+      dbRows = dbRows.filter(x=>x._id !== rec._id); await refresh();
+    }catch(err){ st.textContent = "Fehler: " + err.message; del.hidden = false; }
+  };
   document.getElementById("csvSave").onclick = ()=>{
     const blob = new Blob(["\uFEFF"+toCsv()],{type:"text/csv;charset=utf-8"});
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "apriko-kundenumfrage-2026.csv";
@@ -137,11 +168,11 @@ async function loadDb(){
   if(!token) return;
   dbInfo2.textContent = "Lade …";
   try{
-    const r = await fetch(SUPABASE_URL + "/rest/v1/umfrage_antworten?select=created_at,firma,payload&umfrage=eq." + UMFRAGE_ID + "&order=created_at.desc&limit=5000",
+    const r = await fetch(SUPABASE_URL + "/rest/v1/umfrage_antworten?select=id,created_at,firma,payload&umfrage=eq." + UMFRAGE_ID + "&order=created_at.desc&limit=5000",
       { headers:{ "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token } });
     if(r.status === 401){ token = null; try{ sessionStorage.removeItem("apriko-umfrage-token"); }catch(e){} showLogged(false); dbInfo.textContent = "Sitzung abgelaufen, bitte neu anmelden."; return; }
     if(!r.ok) throw new Error(r.status);
-    dbRows = (await r.json()).map(x=>x.payload).filter(x=>x && x.answers);
+    dbRows = (await r.json()).filter(x=>x.payload && x.payload.answers).map(x=>Object.assign({}, x.payload, {_src:"db", _id:x.id, _created:x.created_at}));
     showLogged(true);
     dbInfo2.textContent = dbRows.length + " Antworten aus der Datenbank · Stand " + new Date().toLocaleTimeString("de-CH",{hour:"2-digit",minute:"2-digit"});
     await refresh();
@@ -166,7 +197,7 @@ document.getElementById("dbLogout").onclick = async ()=>{ token = null; dbRows =
 async function refresh(){
   const r = await AntwortCode.extractAll(store.join("\n"));
   const seen = new Set(), all = [];
-  dbRows.concat(r.items.map(x=>x.data)).forEach(d=>{ const k = (d.submittedAt||"") + "|" + ((d.answers||{}).firma||""); if(!seen.has(k)){ seen.add(k); all.push(d); } });
+  dbRows.concat(r.items.map(x=>Object.assign({}, x.data, {_src:"code", _code:x.code}))).forEach(d=>{ const k = (d.submittedAt||"") + "|" + ((d.answers||{}).firma||""); if(!seen.has(k)){ seen.add(k); all.push(d); } });
   latest = all;
   info.textContent = r.items.length ? r.items.length + " aus Codes" : "";
   renderResults();

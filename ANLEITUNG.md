@@ -5,7 +5,7 @@ Die Antworten werden beim Absenden direkt in **Supabase** gespeichert (Projekt �
 ## Supabase
 
 - Der Schlüssel in `index.html` / `auswertung.html` ist der **öffentliche** (publishable) Schlüssel. Er darf laut Zugriffsregeln nur **neue Antworten einfügen** – nicht lesen, ändern oder löschen.
-- **Lesen** darf nur, wer mit `benjamin@apriko.com` angemeldet ist. Weitere Personen: Regel «Umfrage: nur Auswerter lesen» in Supabase um deren E-Mail ergänzen.
+- **Lesen und Löschen** darf nur, wer mit `benjamin@apriko.com` angemeldet ist. Weitere Personen: Regel «Umfrage: nur Auswerter lesen» in Supabase um deren E-Mail ergänzen.
 - **Einmalig nötig:** In Supabase unter *Authentication → Users → Add user → Create new user* den Benutzer `benjamin@apriko.com` mit Passwort anlegen und «Auto Confirm User» anhaken. Mit diesem Login meldest du dich in der Auswertung an.
 - Den **service_role**- bzw. **secret**-Schlüssel nie in eine Webseite einbauen.
 
@@ -38,9 +38,10 @@ Fragen und Texte änderst du in **Kundenumfrage-2026-Fragen.xlsx** (Blatt «Text
 ## Auswerten
 
 1. `auswertung.html` öffnen und mit deinem Supabase-Login anmelden – alle Antworten werden geladen («Neu laden» für den aktuellen Stand).
-2. Nur falls ein Kunde einen Code gemailt hat: Code oder ganze Mail ins Feld kopieren → «Hinzufügen».
-3. Doppelte Codes zählen nur einmal. Die Codes bleiben in diesem Browser gespeichert – du kannst laufend neue dazulegen.
-4. «CSV herunterladen» für Excel.
+2. **Tests löschen:** Im Block «Alle Antworten» bei der Testantwort auf «Löschen» → «Ja, löschen». Endgültig, fliesst danach nirgends mehr ein.
+3. Nur falls ein Kunde einen Code gemailt hat: Code oder ganze Mail ins Feld kopieren → «Hinzufügen».
+4. Doppelte Codes zählen nur einmal. Die Codes bleiben in diesem Browser gespeichert – du kannst laufend neue dazulegen.
+5. «CSV herunterladen» für Excel.
 
 Die Codes sind nur in dem Browser gespeichert, in dem du sie eingefügt hast. Bewahre die Mails auf (oder die Codes in einer Textdatei), dann kannst du jederzeit neu einlesen.
 

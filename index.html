@@ -57,8 +57,8 @@ const form = document.getElementById("form");
 const stepsEl = document.getElementById("steps");
 
 function renderSteps(){
-  stepsEl.innerHTML = ACTIVE().map((s,i)=>`<button type="button" data-i="${i}" class="${visited.has(i)&&i!==step?'done':''}" ${i===step?'aria-current="step"':''}><span class="n">${i+1}</span>${esc(s.title)}</button>`).join("") +
-    `<button type="button" data-i="${ACTIVE().length}" ${step===ACTIVE().length?'aria-current="step"':''}><span class="n">✓</span>Absenden</button>`;
+  stepsEl.innerHTML = ACTIVE().map((s,i)=>`<button type="button" data-i="${i}" aria-label="${esc(s.title)}" class="${visited.has(i)&&i!==step?'done':''}" ${i===step?'aria-current="step"':''}><span class="n">${i+1}</span><span class="lbl">${esc(s.title)}</span></button>`).join("") +
+    `<button type="button" data-i="${ACTIVE().length}" aria-label="Absenden" ${step===ACTIVE().length?'aria-current="step"':''}><span class="n">✓</span><span class="lbl">Absenden</span></button>`;
   document.getElementById("progress").style.width = (Math.min(step,ACTIVE().length)/ACTIVE().length*100)+"%";
 }
 stepsEl.addEventListener("click",e=>{const b=e.target.closest("button[data-i]"); if(b) go(+b.dataset.i);});
