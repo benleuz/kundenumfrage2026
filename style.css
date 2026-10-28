@@ -157,7 +157,7 @@ th{font:500 11px var(--f-mono);text-transform:uppercase;color:var(--muted)}
 .brandbar{background:var(--head-bg);color:var(--head-ink);margin-left:calc(-1 * max(16px, env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(16px, env(safe-area-inset-right,0px)));padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));position:relative}
 .brandbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--grad)}
 .brandbar .inner{max-width:760px;margin:0 auto;padding-block:22px 34px;display:flex;flex-direction:column;gap:14px}
-.brandbar .logo{height:34px;width:auto;align-self:flex-start}
+.brandbar .logo{height:38px;width:auto;align-self:flex-start}
 .brandbar .wordmark{font:700 30px/1 var(--f-display);letter-spacing:-.01em;color:var(--head-ink)}
 .brandbar .wordmark span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brandbar h1{color:var(--head-ink)}

@@ -19,7 +19,8 @@ Die Antworten werden beim Absenden direkt in **Supabase** gespeichert (Projekt �
 | `fragen.js` | Alle Fragen, Listen, Roadmap-Themen und Texte – **wird aus der Excel-Datei erzeugt**, nicht von Hand ändern |
 | `code.js` | Erzeugt und liest die Antwort-Codes |
 | `style.css` | Gemeinsames Design (Apriko-Farben) |
-| `logo.png` | **Selbst hinzufügen:** Apriko-Logo (hell, für dunklen Hintergrund). Ohne Datei steht dort «Apriko» als Text. |
+| `logo.png` | Apriko-Logo für den dunklen Kopfbalken (aus «Marketing & Sales › 02 Assets › Icons › apriko_logo_transparent.png», Schrift weiss eingefärbt) |
+| `icon.png` | Apriko-Icon fürs Browser-Tab (aus `icon-color-transparent.png`) |
 
 Fragen und Texte änderst du in **Kundenumfrage-2026-Fragen.xlsx** (Blatt «Texte» enthält auch die Empfängeradresse). Die Excel-Datei an Claude geben → neue `fragen.js` → im Repo ersetzen.
 
