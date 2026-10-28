@@ -14,7 +14,8 @@ Die Antworten werden beim Absenden direkt in **Supabase** gespeichert (Projekt �
 | Datei | Zweck |
 |---|---|
 | `index.html` | Die Umfrage für Kunden |
-| `auswertung.html` | Auswertung: Codes aus den Mails einfügen |
+| `auswertung.html` | Auswertung (Login), inkl. Workshop-Anmeldungen und Löschen von Tests |
+| `workshop.html` | Nur die Workshop-Einladung für **Neukunden** (ohne Umfrage) |
 | `fragen.js` | Alle Fragen, Listen, Roadmap-Themen und Texte – **wird aus der Excel-Datei erzeugt**, nicht von Hand ändern |
 | `code.js` | Erzeugt und liest die Antwort-Codes |
 | `style.css` | Gemeinsames Design (Apriko-Farben) |
@@ -32,7 +33,7 @@ Fragen und Texte änderst du in **Kundenumfrage-2026-Fragen.xlsx** (Blatt «Text
 ## So läuft es für den Kunden
 
 1. Startbildschirm: Umfrage + KI-/API-Workshop, «Umfrage starten».
-2. Umfrage ausfüllen (BPO-Teil erscheint nur, wenn BPO angehakt ist). Letzter Abschnitt: Workshop-Anmeldung (Termin, Name, E-Mail, Anzahl Personen). Die Termine sind erst wählbar, wenn mindestens 75 % der Umfrage ausgefüllt sind (Wert und Text im Blatt «Texte»: `ws_mindestquote`, `ws_sperre_…`).
+2. Umfrage ausfüllen (BPO-Teil erscheint nur, wenn BPO angehakt ist). Letzter Abschnitt: Workshop-Anmeldung via Microsoft Teams (Termin, Name, E-Mail). Die Termine sind erst wählbar, wenn mindestens 75 % der Umfrage ausgefüllt sind (Wert und Text im Blatt «Texte»: `ws_mindestquote`, `ws_sperre_…`).
 3. «Antworten senden» → gespeichert, Bestätigung inkl. Workshop-Termin. Nur im Rückfall erscheint der Antwort-Code.
 4. «Per E-Mail senden» öffnet das Mailprogramm mit fertiger Nachricht an dich. Falls sich nichts öffnet: «Code kopieren» und selbst mailen.
 
@@ -43,7 +44,7 @@ Fragen und Texte änderst du in **Kundenumfrage-2026-Fragen.xlsx** (Blatt «Text
 3. Nur falls ein Kunde einen Code gemailt hat: Code oder ganze Mail ins Feld kopieren → «Hinzufügen».
 4. Doppelte Codes zählen nur einmal. Die Codes bleiben in diesem Browser gespeichert – du kannst laufend neue dazulegen.
 5. «CSV herunterladen» für Excel.
-6. **Workshop:** Block «Anmeldungen KI-/API-Workshop» zeigt Personen pro Termin, Kontaktliste und «E-Mail-Adressen kopieren» (für die Einladung per BCC).
+6. **Workshop:** Block «Anmeldungen KI-/API-Workshop» zeigt Anmeldungen pro Termin, Kontaktliste und «E-Mail-Adressen kopieren» (für die Einladung per BCC).
 
 Die Codes sind nur in dem Browser gespeichert, in dem du sie eingefügt hast. Bewahre die Mails auf (oder die Codes in einer Textdatei), dann kannst du jederzeit neu einlesen.
 
@@ -58,3 +59,10 @@ Die Codes sind nur in dem Browser gespeichert, in dem du sie eingefügt hast. Be
 - **NPS:** Anteil 9–10 minus Anteil 0–6, in Prozentpunkten (−100 bis +100).
 - **Bewertungen:** Skala 1–6 ohne Mitte (1 = sehr schlecht, 6 = sehr gut). Nicht beurteilbare Fragen bleiben leer. Angezeigt: Durchschnitt und Anteil «zufrieden» (4–6). Zahl in Klammern = Anzahl Antworten.
 - **Roadmap:** Jeder Kunde wählt seine Top 3. Platz 1 = 3 Punkte, Platz 2 = 2, Platz 3 = 1; eigene Themen der Kunden separat aufgelistet.
+
+## Workshop-Einladung für Neukunden
+
+- Link: `https://benleuz.github.io/kundenumfrage2026/workshop.html`
+- Nur Termin, Firma, Name, E-Mail – keine Bewertungsfragen.
+- Gespeichert in derselben Tabelle (`umfrage = workshop-2026`). In der Auswertung erscheinen die Anmeldungen im Workshop-Block mit «Neukunde», fliessen aber **nicht** in die Umfrage-Kennzahlen ein.
+- Texte im Excel-Blatt «Texte» unter `neu_…`.

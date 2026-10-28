@@ -278,3 +278,13 @@ html{overflow-x:hidden}               /* Sicherheitsnetz gegen 1-px-Überstände
   .steps button{padding:7px 8px;gap:5px;font-size:12.5px}
 }
 @media (max-width:620px){ .steps{gap:3px} .steps button{padding:4px} }
+
+/* ===== Angeheftete Schrittleiste, kein Springen ===== */
+.stickybar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);display:flex;flex-direction:column;gap:10px;padding-block:12px 10px;margin-top:-12px;
+  margin-left:calc(-1 * max(16px, env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(16px, env(safe-area-inset-right,0px)));
+  padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+@media (min-width:932px){ .stickybar{margin-left:0;margin-right:0;padding-left:0;padding-right:0} }
+.stickybar::after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:12px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+#survey{min-height:100vh;min-height:100dvh;align-content:start}
+#survey > #form{scroll-margin-top:0}
