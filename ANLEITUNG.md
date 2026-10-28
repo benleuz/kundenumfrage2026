@@ -56,5 +56,5 @@ Die Codes sind nur in dem Browser gespeichert, in dem du sie eingefügt hast. Be
 ## Auswertung – wie gerechnet wird
 
 - **NPS:** Anteil 9–10 minus Anteil 0–6, in Prozentpunkten (−100 bis +100).
-- **Bewertungen:** Durchschnitt 1–5, «k. A.» zählt nicht. Zahl in Klammern = Anzahl Antworten.
+- **Bewertungen:** Skala 1–6 ohne Mitte (1 = sehr schlecht, 6 = sehr gut). Nicht beurteilbare Fragen bleiben leer. Angezeigt: Durchschnitt und Anteil «zufrieden» (4–6). Zahl in Klammern = Anzahl Antworten.
 - **Roadmap:** Jeder Kunde wählt seine Top 3. Platz 1 = 3 Punkte, Platz 2 = 2, Platz 3 = 1; eigene Themen der Kunden separat aufgelistet.

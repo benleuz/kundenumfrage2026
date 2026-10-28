@@ -13,6 +13,9 @@ table.answers td{vertical-align:middle}
 table.answers td.act{white-space:nowrap;text-align:right}
 .btn.small{padding:5px 10px;font-size:13px}
 .confirm{font-size:13px}
+.hbar:has(.pct){grid-template-columns:minmax(0,1fr) 120px 40px 48px}
+.hbar .pct{color:var(--muted)}
+@media (max-width:480px){.hbar:has(.pct){grid-template-columns:minmax(0,1fr) 60px 34px 42px}}
 </style>
 </head>
 <body>
@@ -65,12 +68,12 @@ function renderResults(){
   let html = `<div class="kpis">
     <div class="kpi"><span>Antworten</span><b>${n}</b></div>
     <div class="kpi"><span>NPS (−100 bis +100)</span><b>${npsScore==null?'–':(npsScore>0?'+':'')+npsScore}</b></div>
-    <div class="kpi"><span>Gesamtzufriedenheit Ø</span><b>${gt==null?'–':gt.toFixed(1)}</b></div>
+    <div class="kpi"><span>Gesamtzufriedenheit Ø (1–6)</span><b>${gt==null?'–':gt.toFixed(1)}</b></div>
     <div class="kpi"><span>Gesprächswunsch</span><b>${cb}</b></div></div>`;
   SECTIONS.filter(s=>s.items).forEach(s=>{
-    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Bewertung 1–5</span><h2>${esc(s.title)}</h2></div><div>`;
-    s.items.forEach(([k,l])=>{ const vals = R.map(r=>r.answers[k]); const a = avg(vals); const cnt = vals.filter(x=>x&&x!=="na").length;
-      html += `<div class="hbar"><span>${esc(l)} <span class="muted">(${cnt})</span></span><span class="track"><i style="width:${a?((a-1)/4*100).toFixed(0):0}%;background:${a?color(a,5):'transparent'}"></i></span><span class="v">${a==null?'–':a.toFixed(1)}</span></div>`; });
+    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Bewertung 1–6 · Ø und Anteil zufrieden (4–6)</span><h2>${esc(s.title)}</h2></div><div>`;
+    s.items.forEach(([k,l])=>{ const vals = R.map(r=>r.answers[k]); const a = avg(vals); const valid = vals.filter(x=>x&&x!=="na"); const cnt = valid.length; const happy = cnt ? Math.round(valid.filter(x=>Number(x)>=4).length/cnt*100) : null;
+      html += `<div class="hbar"><span>${esc(l)} <span class="muted">(${cnt})</span></span><span class="track"><i style="width:${a?((a-1)/5*100).toFixed(0):0}%;background:${a?color(a,6):'transparent'}"></i></span><span class="v">${a==null?'–':a.toFixed(1)}</span><span class="v pct">${happy==null?'':happy+' %'}</span></div>`; });
     const cs = R.filter(r=>r.answers["c_"+s.id]);
     html += `</div>${cs.length?`<div><h3>Kommentare</h3>${cs.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers["c_"+s.id])}</div>`).join("")}</div>`:''}</div>`;
   });
@@ -81,16 +84,29 @@ function renderResults(){
   html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Wahrnehmung</span><h2>Entwicklungsfortschritte 2026 bemerkt?</h2><p class="note">${fsN} Antworten</p></div><div>${
     FORTSCHRITT.map(o=>{ const c = fs[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${fsN?(c/fsN*100).toFixed(0):0}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`; }).join("")}</div>
     ${fsTxt.length?`<div><h3>Kommentare</h3>${fsTxt.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.g_fortschritt||'')}</div>${esc(r.answers.g_fortschritt_txt)}</div>`).join("")}</div>`:''}</div>`;
+  // Tendenz 2026 (Software / BPO)
+  if(typeof TENDENZ!=="undefined" && TENDENZ.length){
+    const block = (key,label)=>{
+      const c = {}; R.forEach(r=>{ const v = r.answers[key]; if(v) c[v]=(c[v]||0)+1; });
+      const n = Object.values(c).reduce((a,b)=>a+b,0); if(!n) return `<div><h3>${label}</h3><p class="muted">Noch keine Antworten.</p></div>`;
+      const pos = (c[TENDENZ[0]]||0)+(c[TENDENZ[1]]||0), neg = (c[TENDENZ[3]]||0)+(c[TENDENZ[4]]||0), rated = n-(c[TENDENZ[5]]||0);
+      const saldo = rated ? Math.round((pos-neg)/rated*100) : 0;
+      const col = i => i<2 ? "var(--good)" : i===2 ? "var(--muted)" : i<5 ? "var(--bad)" : "var(--line)";
+      return `<div><h3>${label} <span class="muted" style="font-weight:400">· Saldo ${saldo>0?'+':''}${saldo} (besser minus schlechter, in %)</span></h3>${
+        TENDENZ.map((o,i)=>{ const k = c[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${(k/n*100).toFixed(0)}%;background:${col(i)}"></i></span><span class="v">${k}</span></div>`; }).join("")}</div>`;
+    };
+    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Entwicklung</span><h2>Tendenz 2026: besser oder schlechter?</h2></div>${block("trend_sw","Software")}${block("trend_bpo","BPO")}</div>`;
+  }
   // Workshop-Anmeldungen
   if(typeof WS_TERMINE!=="undefined" && WS_TERMINE.length){
     const wsDates = WS_TERMINE.slice(0, Math.max(0, WS_TERMINE.length-2));
     const reg = R.filter(r=>wsDates.includes(r.answers.ws_termin));
     const later = R.filter(r=>r.answers.ws_termin && r.answers.ws_termin===WS_TERMINE[WS_TERMINE.length-2] && wsDates.length < WS_TERMINE.length-1);
-    const persons = d=>R.filter(r=>r.answers.ws_termin===d).reduce((a,r)=>a+(parseInt(r.answers.ws_anzahl,10)||1),0);
-    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Workshop</span><h2>Anmeldungen Workshop «${esc(typeof T==="function"?T("ws_titel","Die Zukunft ist heute."):"Die Zukunft ist heute.")}»</h2><p class="note">${reg.length} Anmeldungen · ${wsDates.reduce((a,d)=>a+persons(d),0)} Personen</p></div>
-      <div class="kpis" style="grid-template-columns:repeat(${Math.max(1,wsDates.length)},1fr)">${wsDates.map(d=>`<div class="kpi"><span>${esc(d)}</span><b>${persons(d)}</b><span>Personen aus ${R.filter(r=>r.answers.ws_termin===d).length} Anmeldung(en)</span></div>`).join("")}</div>
-      ${reg.length?`<div class="tablewrap"><table><thead><tr><th>Termin</th><th>Name</th><th>E-Mail</th><th>Firma</th><th>Pers.</th></tr></thead><tbody>${
-        reg.map(r=>`<tr><td>${esc(r.answers.ws_termin)}</td><td>${esc(r.answers.ws_name||'')}</td><td style="user-select:all">${esc(r.answers.ws_mail||'')}</td><td>${esc(r.answers.firma||'anonym')}</td><td>${esc(r.answers.ws_anzahl||'1')}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Noch keine Anmeldungen.</p>'}
+    const regs = d=>R.filter(r=>r.answers.ws_termin===d).length;
+    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Workshop</span><h2>Anmeldungen Workshop «${esc(typeof T==="function"?T("ws_titel","Die Zukunft ist heute."):"Die Zukunft ist heute.")}»</h2><p class="note">${reg.length} Anmeldungen · online via Microsoft Teams</p></div>
+      <div class="kpis" style="grid-template-columns:repeat(${Math.max(1,wsDates.length)},1fr)">${wsDates.map(d=>`<div class="kpi"><span>${esc(d)}</span><b>${regs(d)}</b><span>Anmeldung(en)</span></div>`).join("")}</div>
+      ${reg.length?`<div class="tablewrap"><table><thead><tr><th>Termin</th><th>Name</th><th>E-Mail</th><th>Firma</th></tr></thead><tbody>${
+        reg.map(r=>`<tr><td>${esc(r.answers.ws_termin)}</td><td>${esc(r.answers.ws_name||'')}</td><td style="user-select:all">${esc(r.answers.ws_mail||'')}</td><td>${esc(r.answers.firma||'anonym')}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Noch keine Anmeldungen.</p>'}
       ${later.length?`<div><h3>Möchten über weitere Termine informiert werden (${later.length})</h3>${later.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')}</div>${esc(r.answers.ws_name||'')} · ${esc(r.answers.ws_mail||'')}</div>`).join("")}</div>`:''}
       ${reg.length?`<div class="nav" style="justify-content:flex-start"><button type="button" class="btn ghost" id="wsCopy">E-Mail-Adressen kopieren</button><span class="note" id="wsNote"></span></div>`:''}</div>`;
   }
@@ -103,6 +119,15 @@ function renderResults(){
     API_OPTIONS.map(o=>{ const c = ap[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${apN?(c/apN*100).toFixed(0):0}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`; }).join("")}</div>
     ${leads.length?`<div><h3>Möchten kontaktiert werden (${leads.length})</h3>${leads.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers.api_txt||'(keine Systeme genannt)')}${r.answers.kname||r.answers.kmail?` · Kontakt: ${esc(r.answers.kname||'')} ${esc(r.answers.kmail||'')}`:''}</div>`).join("")}</div>`:''}
     ${apTxt.length?`<div><h3>Gewünschte Anbindungen</h3>${apTxt.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.api||'')}</div>${esc(r.answers.api_txt)}</div>`).join("")}</div>`:''}</div>`;
+  // Eigene Lösungen (Insellösungen)
+  if(typeof INSEL_OPTIONS!=="undefined" && INSEL_OPTIONS.length){
+    const il = {}; R.forEach(r=>{ const v = r.answers.insel; if(v) il[v]=(il[v]||0)+1; });
+    const ilN = Object.values(il).reduce((a,b)=>a+b,0);
+    const ilTxt = R.filter(r=>r.answers.insel_txt);
+    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Integrationspotenzial</span><h2>Eigene Apps, Formulare, Excel-Listen</h2><p class="note">${ilN} Antworten · noch nicht mit Apriko verbunden</p></div><div>${
+      INSEL_OPTIONS.map(o=>{ const c = il[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${ilN?(c/ilN*100).toFixed(0):0}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`; }).join("")}</div>
+      ${ilTxt.length?`<div><h3>Genannte Lösungen</h3>${ilTxt.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}${r.answers.ws_termin&&WS_TERMINE.slice(0,Math.max(0,WS_TERMINE.length-2)).includes(r.answers.ws_termin)?' · Workshop: '+esc(r.answers.ws_termin):''}</div>${esc(r.answers.insel_txt)}</div>`).join("")}</div>`:''}</div>`;
+  }
   // Roadmap: Platz 1 = 3, Platz 2 = 2, Platz 3 = 1 Punkt
   const score = {}, votes = {}, own = [];
   R.forEach(r=>(r.roadmap||[]).forEach(x=>{ if(x.own){ own.push({t:x.title,f:r.answers.firma,rank:x.rank}); return; }
@@ -162,7 +187,7 @@ function renderResults(){
 }
 function toCsv(){
   const keys = ["firma","rolle","seit","ma","services"]; SECTIONS.filter(s=>s.items).forEach(s=>{ s.items.forEach(i=>keys.push(i[0])); keys.push("c_"+s.id); });
-  keys.push("api","api_txt","c_bpo","bpo_interest","c_roadmap","nps","g_fortschritt","g_fortschritt_txt","g_total","g_preis","g_best","g_improve","callback","kname","kmail","ws_termin","ws_name","ws_mail","ws_anzahl");
+  keys.push("api","api_txt","insel","insel_txt","trend_sw","trend_bpo","c_bpo","bpo_interest","c_roadmap","nps","g_fortschritt","g_fortschritt_txt","g_total","g_preis","g_best","g_improve","callback","kname","kmail","ws_termin","ws_name","ws_mail");
   const q = v=>'"'+String(v==null?"":Array.isArray(v)?v.join(", "):v).replace(/"/g,'""')+'"';
   const head = keys.concat(["roadmap","eingereicht"]);
   const rows = latest.map(r=>keys.map(k=>q(r.answers[k])).concat([q((r.roadmap||[]).map(x=>x.rank+". "+x.title).join(" | ")), q(r.submittedAt)]).join(";"));

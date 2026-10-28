@@ -8,7 +8,8 @@ var TEXTE = {
  "start_umfrage_titel": "Kundenumfrage · ca. 8 Minuten",
  "start_umfrage_text": "Sag uns, wie zufrieden du mit Software, Support und BPO bist, und wähle deine Top 3 für unsere Roadmap.",
  "start_ws_titel": "Workshop: Die Zukunft ist heute.",
- "start_ws_text": "KI & API in der Praxis, 1 Stunde: Wir zeigen dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust. Anmelden kannst du dich am Ende der Umfrage.",
+ "start_ws_text": "KI & API in der Praxis, 1 Stunde online via Microsoft Teams: Wir zeigen dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust. Anmelden kannst du dich am Ende der Umfrage.",
+ "ws_claim": "Nutze den technischen Fortschritt – heute! Was du damit machen kannst, kannst du mit keinem unserer Mitbewerber.",
  "start_knopf": "Umfrage starten",
  "ueber_einleitung": "Damit wir die Antworten richtig einordnen können. Der Firmenname ist freiwillig.",
  "lbl_firma": "Firma (optional)",
@@ -20,7 +21,12 @@ var TEXTE = {
  "api_kommentar": "Welche Systeme würdest du gerne anbinden? (z. B. Zeiterfassung, Buchhaltung, Jobportale)",
  "api_hinweis": "Ui, dann musst du dich unbedingt für unseren Workshop «Die Zukunft ist heute.» anmelden! In einer Stunde zeigen wir dir, wie du mit unserer API und KI zum Beispiel ein eigenes Dashboard baust. Anmelden kannst du dich am Ende der Umfrage.",
  "api_hinweis_nutzer": "Stark! Dann ist unser Workshop «Die Zukunft ist heute.» genau richtig für dich: Wir zeigen dir, was mit KI und unserer API noch alles drinliegt. Anmelden kannst du dich am Ende der Umfrage.",
+ "insel_frage": "Nutzt du eigene Apps, Formulare oder Excel-Listen (z. B. Stundenrapporte von Kunden) für Kunden oder Kandidaten, die noch nicht mit Apriko verbunden sind?",
+ "insel_kommentar": "Welche? (z. B. Excel-Stundenrapporte, Online-Formulare, eigene App für Kandidaten)",
+ "insel_hinweis_ja": "Perfekt, genau solche Insellösungen verbinden wir im Workshop «Die Zukunft ist heute.» mit Apriko. Bring deine Beispiele mit! Anmelden kannst du dich am Ende der Umfrage.",
+ "insel_hinweis_andere": "Dann zeigen wir dir im Workshop «Die Zukunft ist heute.», was du mit KI und unserer API zusätzlich aus Apriko herausholst – vielleicht entdeckst du ja doch noch die eine oder andere Excel-Liste. Anmelden kannst du dich am Ende der Umfrage.",
  "bpo_kommentar": "Anmerkungen zu BPO",
+ "trend_bpo_frage": "Wie hat sich dein Gesamteindruck von unseren BPO-Leistungen im 2026 entwickelt?",
  "roadmap_titel": "Deine Wunsch-Roadmap",
  "roadmap_intro": "Welche drei Themen sollen wir als Nächstes bauen? Zieh deine Top 3 nach rechts und sortiere sie: Platz 1 ist am wichtigsten. Fehlt dein Thema, füg es unten hinzu.",
  "roadmap_eigen": "Eigenes Thema hinzufügen",
@@ -30,6 +36,7 @@ var TEXTE = {
  "nps_10": "10 = äusserst wahrscheinlich",
  "fortschritt_frage": "Hast du im 2026 Entwicklungsfortschritte bei Apriko bemerkt?",
  "fortschritt_kommentar": "Welche Fortschritte sind dir aufgefallen, oder was hast du vermisst?",
+ "trend_sw_frage": "Und die Software: Wie hat sich dein Gesamteindruck im 2026 entwickelt?",
  "g_best": "Was schätzt du an Apriko am meisten?",
  "g_improve": "Was sollten wir als Erstes verbessern?",
  "gespraech": "Ich wünsche mir ein persönliches Gespräch zu meinem Feedback",
@@ -37,9 +44,8 @@ var TEXTE = {
  "ws_frage": "Möchtest du am Workshop teilnehmen?",
  "ws_name": "Name",
  "ws_mail": "E-Mail",
- "ws_anzahl": "Anzahl Personen",
- "ws_hinweis": "Die Details (Uhrzeit und Ort bzw. Zugangslink) schicken wir dir nach der Anmeldung per E-Mail.",
- "ws_bestaetigung": "Deine Workshop-Anmeldung ist eingegangen. Wir melden uns mit den Details.",
+ "ws_hinweis": "Der Workshop findet online via Microsoft Teams statt. Den Link und die genaue Uhrzeit schicken wir dir nach der Anmeldung per E-Mail.",
+ "ws_bestaetigung": "Deine Workshop-Anmeldung ist eingegangen. Den Teams-Link und die genaue Uhrzeit schicken wir dir per E-Mail.",
  "ws_mindestquote": "75",
  "ws_sperre_titel": "Hmm … da geht aber noch mehr!",
  "ws_sperre_text": "Du hast erst {prozent} % der Umfrage ausgefüllt. Um an unserem Workshop teilzunehmen, bitten wir dich, uns zuerst dein Feedback zu geben. Ab {mindest} % kannst du dich anmelden – das dauert nur noch ein paar Minuten.",
@@ -52,7 +58,7 @@ var TEXTE = {
 };
 function T(k, fallback){ return (k in TEXTE) ? TEXTE[k] : (fallback || ''); }
 var CONTACT = T('empfaenger','hello@apriko.com');
-var SCALE = ['1','2','3','4','5'];
+var SCALE = ['1','2','3','4','5','6'];
 var SECTIONS = [
  {
   "id": "about",
@@ -182,17 +188,27 @@ var SECTIONS = [
   "id": "bpo",
   "title": "BPO",
   "kind": "bpo",
-  "lead": "Business Process Outsourcing: Prozesse, die Apriko für euch übernimmt (z. B. Lohnverarbeitung).",
+  "lead": "Business Process Outsourcing: Prozesse, die Apriko für euch übernimmt (z. B. Lohnverarbeitung, Debitoren, Finanzbuchhaltung).",
   "items": [
    [
     "b_termin",
-    "Termintreue der Lohnläufe",
-    ""
+    "Termintreue",
+    "Lohnläufe, Buchungen, Abschlüsse"
    ],
    [
     "b_fehler",
-    "Fehlerfreiheit",
+    "Qualität",
+    "Fehlerfreiheit und Sorgfalt der Verarbeitung"
+   ],
+   [
+    "b_erreich",
+    "Erreichbarkeit",
     ""
+   ],
+   [
+    "b_fach",
+    "Fachkompetenz",
+    "Lohn, Sozialversicherungen, Buchhaltung"
    ],
    [
     "b_komm",
@@ -227,7 +243,7 @@ var SECTIONS = [
   "id": "workshop",
   "title": "Workshop",
   "kind": "workshop",
-  "lead": "KI & API in der Praxis, 1 Stunde: Wir zeigen dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust."
+  "lead": "KI & API in der Praxis, 1 Stunde online via Microsoft Teams: Wir zeigen dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust."
  }
 ];
 var TOPICS = [
@@ -285,12 +301,14 @@ var TOPICS = [
 var ROLES = ["Geschäftsleitung", "Disposition / Recruiting", "Lohn / Administration", "Buchhaltung / Finanzen", "IT", "Andere"];
 var SINCE = ["weniger als 1 Jahr", "1–2 Jahre", "3–5 Jahre", "mehr als 5 Jahre"];
 var MA = ["bis 50", "51–200", "201–500", "über 500"];
-var SERVICES = ["Software", "BPO Lohn- und Debitoren"];
+var SERVICES = ["Software", "BPO Lohn- und Debitoren", "BPO Finanzbuchhaltung (inkl. Kreditoren)"];
 var BPO_OPTIONS = [];
 var FORTSCHRITT = ["Ja, deutlich", "Ja, etwas", "Kaum", "Nein", "Kann ich nicht beurteilen"];
 var API_OPTIONS = ["Ja, und wir nutzen das bereits", "Ja, aber wir nutzen es (noch) nicht", "Nein, das war mir nicht bewusst", "Klingt spannend, bitte meldet euch bei uns"];
 var WS_TERMINE = ["Montag, 23. November 2026, Nachmittag", "Mittwoch, 25. November 2026, Vormittag", "Ich kann leider nicht, bitte informiert mich über weitere Termine", "Nein, danke"];
-/* Option in «Leistungen», die den BPO-Abschnitt einblendet: die erste, die «BPO» enthält */
-var BPO_SERVICE = SERVICES.find(function(s){ return /bpo/i.test(s); }) || '';
+var INSEL_OPTIONS = ["Ja", "Nein", "Weiss nicht"];
+var TENDENZ = ["Deutlich besser", "Etwas besser", "Gleich geblieben", "Etwas schlechter", "Deutlich schlechter", "Kann ich nicht beurteilen"];
+/* Optionen in «Leistungen», die den BPO-Abschnitt einblenden: alle, die «BPO» enthalten */
+var BPO_SERVICES = SERVICES.filter(function(s){ return /bpo/i.test(s); });
 /* Option in «API-Nutzung», die als Kontaktwunsch gilt: die letzte */
 var API_LEAD = API_OPTIONS[API_OPTIONS.length-1] || '';

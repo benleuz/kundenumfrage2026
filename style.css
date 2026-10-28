@@ -57,9 +57,9 @@ header.top{display:flex;justify-content:space-between;align-items:flex-start;gap
 .panel-head{display:flex;flex-direction:column;gap:6px}
 
 /* Bewertungsskala */
-.legend{display:grid;grid-template-columns:1fr repeat(5,44px) 44px;gap:6px;font:500 11px var(--f-mono);color:var(--muted);text-align:center;align-items:end}
+.legend{display:grid;grid-template-columns:1fr repeat(6,44px);gap:6px;font:500 11px var(--f-mono);color:var(--muted);text-align:center;align-items:end}
 .legend span:first-child{text-align:left}
-.q{display:grid;grid-template-columns:1fr repeat(5,44px) 44px;gap:6px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.q{display:grid;grid-template-columns:1fr repeat(6,44px);gap:6px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
 .q .lbl{min-width:0}
 .q .lbl small{display:block;color:var(--muted);font-size:13px}
 .q input{position:absolute;opacity:0;pointer-events:none}
@@ -229,7 +229,7 @@ html{overflow-x:hidden}               /* Sicherheitsnetz gegen 1-px-Überstände
   .steps button .n{flex:0 0 auto}
   .steps button .lbl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
-@media (min-width:621px) and (max-width:899px){
+@media (min-width:621px) and (max-width:939px){
   .steps button{flex:0 0 auto;padding:6px}
   .steps button .lbl{display:none}
   .steps button[aria-current="step"]{flex:1 1 auto;padding:6px 10px}
@@ -267,3 +267,14 @@ html{overflow-x:hidden}               /* Sicherheitsnetz gegen 1-px-Überstände
 .ws-teaser .tag{align-self:flex-start;font:700 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--grad);color:var(--on-grad)}
 @keyframes teaserIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.ws-teaser{animation:none}}
+.claim{margin:0;font:700 16px/1.4 var(--f-display);background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root:not([data-theme="dark"]) .claim{color:var(--ink);-webkit-text-fill-color:currentColor;background:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .claim{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}}
+:root[data-theme="dark"] .claim{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.intro-card .claim{font-size:15px}
+/* 9 Schritte (mit BPO): kompakter setzen */
+@media (min-width:621px){
+  .steps{gap:4px}
+  .steps button{padding:7px 8px;gap:5px;font-size:12.5px}
+}
+@media (max-width:620px){ .steps{gap:3px} .steps button{padding:4px} }

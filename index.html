@@ -19,8 +19,10 @@
 <div class="wrap">
   <section id="intro" class="intro-screen" hidden></section>
   <main id="survey" class="wrap" style="gap:16px">
-    <nav class="steps" id="steps" aria-label="Abschnitte"></nav>
-    <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
+    <div class="stickybar" id="stickybar">
+      <nav class="steps" id="steps" aria-label="Abschnitte"></nav>
+      <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
+    </div>
     <form id="form" novalidate></form>
   </main>
 </div>
@@ -50,12 +52,12 @@ function saveDraft(){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(state)
 function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY);}catch(e){} }
 const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const A = () => state.answers;
-const usesBpo = () => !!BPO_SERVICE && (A().services||[]).includes(BPO_SERVICE);
+const usesBpo = () => (A().services||[]).some(x => BPO_SERVICES.includes(x));
 const ACTIVE = () => SECTIONS.filter(s => s.id!=="bpo" || usesBpo());
 /* Workshop: letzte Option = Absage; alle anderen brauchen Kontaktangaben */
 const wsChoice = () => A().ws_termin || "";
 const wsNeedsContact = () => !!wsChoice() && WS_TERMINE.length > 0 && wsChoice() !== WS_TERMINE[WS_TERMINE.length-1];
-/* Ausfüllgrad: Pflicht-/Kernfragen pro aktivem Abschnitt (Freitext + Firma zählen nicht; «k. A.» zählt als beantwortet) */
+/* Ausfüllgrad: Pflicht-/Kernfragen pro aktivem Abschnitt (Freitext + Firma zählen nicht; nicht beurteilbare Fragen bleiben leer) */
 function completion(){
   const has = v => Array.isArray(v) ? v.length>0 : (v!==undefined && v!==null && String(v).trim()!=="");
   let done=0, total=0; const open=[];
@@ -64,7 +66,9 @@ function completion(){
     if(s.kind==="about"){ if(T("lbl_rolle")&&ROLES.length) keys.push("rolle"); if(T("lbl_seit")&&SINCE.length) keys.push("seit"); if(T("lbl_leistungen")&&SERVICES.length) keys.push("services"); }
     (s.items||[]).forEach(it=>keys.push(it[0]));
     if(s.id==="funktion" && T("api_frage") && API_OPTIONS.length) keys.push("api");
-    if(s.kind==="overall"){ keys.push("nps"); if(T("fortschritt_frage") && FORTSCHRITT.length) keys.push("g_fortschritt"); }
+    if(s.id==="funktion" && T("insel_frage") && INSEL_OPTIONS.length) keys.push("insel");
+    if(s.kind==="overall"){ keys.push("nps"); if(T("fortschritt_frage") && FORTSCHRITT.length) keys.push("g_fortschritt"); if(T("trend_sw_frage") && TENDENZ.length) keys.push("trend_sw"); }
+    if(s.kind==="bpo" && T("trend_bpo_frage") && TENDENZ.length) keys.push("trend_bpo");
     let d = keys.filter(k=>has(A()[k])).length, t = keys.length;
     if(s.kind==="roadmap"){ t++; if(state.roadmap.prio.length) d++; }
     done+=d; total+=t; if(t>d) open.push({idx, title:s.title, n:t-d});
@@ -72,6 +76,15 @@ function completion(){
   return {done, total, pct: total ? Math.round(done/total*100) : 100, open};
 }
 /* Workshop-Hinweis nach der API-Frage: erste Option = nutzt API bereits */
+function teaser(txt){
+  if(!txt) return "";
+  const dates = WS_TERMINE.slice(0, Math.max(0, WS_TERMINE.length-2));
+  return `<div class="ws-teaser"><span class="tag">Workshop</span><p>${esc(txt)}</p>${dates.length?`<div class="ws-dates">${dates.map(d=>`<span class="ws-date">${esc(d)}</span>`).join("")}</div>`:""}</div>`;
+}
+function inselHint(){
+  const v = A().insel; if(!v || !INSEL_OPTIONS.length) return "";
+  return teaser(v === INSEL_OPTIONS[0] ? T("insel_hinweis_ja") : T("insel_hinweis_andere"));
+}
 function apiHint(){
   const v = A().api; if(!v || !API_OPTIONS.length) return "";
   const txt = v === API_OPTIONS[0] ? T("api_hinweis_nutzer") : T("api_hinweis");
@@ -95,12 +108,11 @@ function renderSteps(){
 stepsEl.addEventListener("click",e=>{const b=e.target.closest("button[data-i]"); if(b) go(+b.dataset.i);});
 
 function ratingRows(items){
-  return `<div class="legend" aria-hidden="true"><span></span><span>sehr<br>schlecht</span><span></span><span>neutral</span><span></span><span>sehr<br>gut</span><span>k. A.</span></div>
-  <p class="scale-hint">1 = sehr schlecht · 5 = sehr gut · k. A. = keine Angabe</p>` +
+  return `<div class="legend" aria-hidden="true"><span></span>${SCALE.map((n,i)=>`<span>${i===0?'sehr<br>schlecht':i===SCALE.length-1?'sehr<br>gut':''}</span>`).join("")}</div>
+  <p class="scale-hint">1 = sehr schlecht · ${SCALE.length} = sehr gut</p>` +
   items.map(([k,l,h])=>{
     const v = A()[k];
-    const opts = SCALE.map(n=>`<input type="radio" name="${k}" id="${k}_${n}" value="${n}" ${v===n?'checked':''}><label class="dot" for="${k}_${n}">${n}</label>`).join("") +
-      `<input type="radio" name="${k}" id="${k}_na" value="na" ${v==="na"?'checked':''}><label class="dot na" for="${k}_na">k. A.</label>`;
+    const opts = SCALE.map(n=>`<input type="radio" name="${k}" id="${k}_${n}" value="${n}" ${v===n?'checked':''}><label class="dot" for="${k}_${n}">${n}</label>`).join("");
     return `<div class="q" role="radiogroup" aria-labelledby="${k}_l"><div class="lbl" id="${k}_l">${esc(l)}${h?`<small>${esc(h)}</small>`:''}</div>${opts}</div>`;
   }).join("");
 }
@@ -130,10 +142,13 @@ function render(){
     ${checks("services",T("lbl_leistungen"),SERVICES)}`;
   } else if(s.kind==="rating"){
     body = head(s.title,s.lead) + `<div>${ratingRows(s.items)}</div>`;
-    if(s.id==="funktion") body += radios("api",T("api_frage"),API_OPTIONS) + `<div id="apiHint" aria-live="polite">${apiHint()}</div>` + opt("api_txt",T("api_kommentar"));
+    if(s.id==="funktion") body += radios("api",T("api_frage"),API_OPTIONS) + `<div id="apiHint" aria-live="polite">${apiHint()}</div>` + opt("api_txt",T("api_kommentar"))
+      + radios("insel",T("insel_frage"),INSEL_OPTIONS)
+      + `<div id="inselTxt" ${A().insel && A().insel===INSEL_OPTIONS[0] ? "" : "hidden"}>${opt("insel_txt",T("insel_kommentar"))}</div>`
+      + `<div id="inselHint" aria-live="polite">${inselHint()}</div>`;
     body += opt("c_"+s.id,T("kommentar_bereich"));
   } else if(s.kind==="bpo"){
-    body = head(s.title,s.lead) + (s.items.length?`<div>${ratingRows(s.items)}</div>`:"") + checks("bpo_interest",T("bpo_interesse"),BPO_OPTIONS) + opt("c_bpo",T("bpo_kommentar"));
+    body = head(s.title,s.lead) + (s.items.length?`<div>${ratingRows(s.items)}</div>`:"") + checks("bpo_interest",T("bpo_interesse"),BPO_OPTIONS) + radios("trend_bpo",T("trend_bpo_frage"),TENDENZ) + opt("c_bpo",T("bpo_kommentar"));
   } else if(s.kind==="roadmap"){
     body = head(T("roadmap_titel",s.title), s.lead || T("roadmap_intro")) + `
     <div class="board">
@@ -157,6 +172,7 @@ function render(){
       <div class="nps-ends"><span>${esc(T("nps_0"))}</span><span>${esc(T("nps_10"))}</span></div></div>
     ${radios("g_fortschritt",T("fortschritt_frage"),FORTSCHRITT)}
     ${opt("g_fortschritt_txt",T("fortschritt_kommentar"))}
+    ${radios("trend_sw",T("trend_sw_frage"),TENDENZ)}
     ${s.items.length?`<div>${ratingRows(s.items)}</div>`:""}
     ${opt("g_best",T("g_best"))}
     ${opt("g_improve",T("g_improve"))}
@@ -178,13 +194,12 @@ function render(){
         <span class="note">${c.pct} % ausgefüllt · ${c.done} von ${c.total} Fragen</span>
         ${c.open.length?`<span class="note">${esc(T("ws_sperre_offen","Hier fehlt noch etwas:"))}</span><div class="gate-links">${c.open.map(o=>`<button type="button" class="btn ghost small" data-go="${o.idx}">${esc(o.title)} · ${o.n} offen</button>`).join("")}</div>`:""}
       </div>`;
-    body = head(T("ws_titel", s.title), s.lead||"") + gate + `
+    body = head(T("ws_titel", s.title), s.lead||"") + (T("ws_claim")?`<p class="claim">${esc(T("ws_claim"))}</p>`:"") + gate + `
     ${T("ws_frage") && WS_TERMINE.length ? `<div class="field"><span class="label" id="ws_termin_l">${esc(T("ws_frage"))}</span><div class="checks" role="radiogroup" aria-labelledby="ws_termin_l">${WS_TERMINE.map((x,i)=>{ const locked = !ok && i < dateCount; return `<label class="${locked?'locked':''}"><input type="radio" name="ws_termin" id="ws_termin_${i}" value="${esc(x)}" ${A().ws_termin===x?'checked':''} ${locked?'disabled':''}>${esc(x)}${locked?' <span class="lock" aria-hidden="true">🔒</span>':''}</label>`; }).join("")}</div></div>` : ""}
     <div id="wsContact" ${need?'':'hidden'}>
       <div class="grid2">
         <div class="field"><label for="ws_name">${esc(T("ws_name","Name"))}</label><input type="text" id="ws_name" name="ws_name" value="${esc(A().ws_name||A().kname||'')}" autocomplete="name"></div>
         <div class="field"><label for="ws_mail">${esc(T("ws_mail","E-Mail"))}</label><input type="email" id="ws_mail" name="ws_mail" value="${esc(A().ws_mail||'')}" autocomplete="email"></div>
-        <div class="field" id="wsAnzahlField" ${wsIsDate()?'':'hidden'}><label for="ws_anzahl">${esc(T("ws_anzahl","Anzahl Personen"))}</label><select id="ws_anzahl" name="ws_anzahl">${["1","2","3","4","5"].map(n=>`<option ${ (A().ws_anzahl||"1")===n?'selected':''}>${n}</option>`).join("")}</select></div>
       </div>
       ${T("ws_hinweis")?`<p class="note">${esc(T("ws_hinweis"))}</p>`:""}
     </div>`;
@@ -214,7 +229,8 @@ function collect(e){
   else if(t.type==="radio"){ if(t.checked) A()[t.name] = t.value; }
   else A()[t.name] = t.value;
   if(t.name==="api"){ const h = document.getElementById("apiHint"); if(h) h.innerHTML = apiHint(); }
-  if(t.name==="ws_termin"){ const c = document.getElementById("wsContact"); if(c) c.hidden = !wsNeedsContact(); const f = document.getElementById("wsAnzahlField"); if(f) f.hidden = !wsIsDate(); if(wsIsDate() && !A().ws_anzahl) A().ws_anzahl = "1"; }
+  if(t.name==="insel"){ const h = document.getElementById("inselHint"); if(h) h.innerHTML = inselHint(); const x = document.getElementById("inselTxt"); if(x) x.hidden = t.value !== INSEL_OPTIONS[0]; }
+  if(t.name==="ws_termin"){ const c = document.getElementById("wsContact"); if(c) c.hidden = !wsNeedsContact(); }
   if(t.name==="services"){ renderSteps(); const eb = form.querySelector(".panel-head .eyebrow"); if(eb) eb.textContent = "Abschnitt " + (step+1) + " von " + ACTIVE().length; }
   saveDraft();
 }
@@ -289,19 +305,20 @@ function syncFromDom(){
 /* ---------- Submit ---------- */
 function buildPayload(){
   const answers = JSON.parse(JSON.stringify(A()));
-  if(!wsNeedsContact()){ delete answers.ws_name; delete answers.ws_mail; delete answers.ws_anzahl; }
-  if(!wsIsDate()) delete answers.ws_anzahl;
-  if(!usesBpo()) Object.keys(answers).filter(k=>/^b_/.test(k)||k==="c_bpo"||k==="bpo_interest").forEach(k=>delete answers[k]);
+  if(answers.insel !== INSEL_OPTIONS[0]) delete answers.insel_txt;
+  delete answers.ws_anzahl;
+  if(!wsNeedsContact()){ delete answers.ws_name; delete answers.ws_mail; }
+  if(!usesBpo()) Object.keys(answers).filter(k=>/^b_/.test(k)||k==="c_bpo"||k==="bpo_interest"||k==="trend_bpo").forEach(k=>delete answers[k]);
   return {
     answers,
     roadmap: state.roadmap.prio.map((id,i)=>{const t=topicById(id); return {rank:i+1,id,title:t.title,own:t.own};}),
-    submittedAt: new Date().toISOString(), version: 1
+    submittedAt: new Date().toISOString(), version: 2, scale: SCALE.length
   };
 }
 function plainText(p){
   const a = p.answers, L = [];
   L.push("Apriko Kundenumfrage 2026"); L.push("Firma: "+(a.firma||"(anonym)")); L.push("Funktion: "+(a.rolle||"-")+" | Kunde seit: "+(a.seit||"-"));
-  ACTIVE().filter(s=>s.items).forEach(s=>{ L.push("\n"+s.title.toUpperCase()); s.items.forEach(([k,l])=>L.push("  "+l+": "+(a[k]==="na"?"k. A.":(a[k]||"-")))); if(a["c_"+s.id]) L.push("  Kommentar: "+a["c_"+s.id]); });
+  ACTIVE().filter(s=>s.items).forEach(s=>{ L.push("\n"+s.title.toUpperCase()); s.items.forEach(([k,l])=>L.push("  "+l+": "+(a[k]||"-"))); if(a["c_"+s.id]) L.push("  Kommentar: "+a["c_"+s.id]); });
   if((a.bpo_interest||[]).length) L.push("Interesse BPO: "+a.bpo_interest.join(", "));
   L.push("\nROADMAP"); p.roadmap.forEach(r=>L.push("  "+r.rank+". "+r.title+(r.own?" (eigenes Thema)":"")));
   L.push("\nEmpfehlung (0–10): "+(a.nps??"-")+" | Gesamt: "+(a.g_total||"-"));
@@ -326,7 +343,7 @@ function renderSubmit(){
   form.innerHTML = `<div class="panel">
     <div class="panel-head"><span class="eyebrow">Fast geschafft</span><h2>Antworten absenden</h2>
     <p class="muted">${rated} Bewertungen, ${p.roadmap.length} Roadmap-Prioritäten${A().firma?`, Firma: ${esc(A().firma)}`:', ohne Firmenangabe'}.</p>
-    ${wsIsDate()?`<p class="ws-sum">Workshop: <b>${esc(wsChoice())}</b> · ${esc(A().ws_anzahl||"1")} Person(en)</p>`:""}</div>
+    ${wsIsDate()?`<p class="ws-sum">Workshop (Teams): <b>${esc(wsChoice())}</b></p>`:""}</div>
     ${m.length?`<div class="msg err"><b>Bitte noch ergänzen:</b><span>${m.map(esc).join("<br>")}</span></div>`:''}
     <div id="submitArea"></div>
     <div class="nav"><button type="button" class="btn ghost" id="prev">Zurück</button><button type="button" class="btn primary" id="send" ${m.length?'disabled':''}>Antworten senden</button></div>
@@ -386,10 +403,16 @@ async function send(){
   };
   document.getElementById("mailBtn").addEventListener("click",()=>{ document.getElementById("copyNote").textContent = "Dein Mailprogramm sollte sich jetzt öffnen. Vielen Dank fürs Mitmachen!"; });
 }
+/* Beim Abschnittswechsel: Leiste bleibt stehen, neuer Inhalt beginnt direkt darunter (kein Springen) */
+function keepPlace(){
+  const bar = document.getElementById("stickybar"), sv = document.getElementById("survey");
+  const top = sv.getBoundingClientRect().top + window.scrollY;
+  if(window.scrollY > top) window.scrollTo({top, behavior:"auto"});
+}
 function go(i){
   if(i<0||i>ACTIVE().length) return;
   step = i; visited.add(i); render();
-  document.getElementById("survey").scrollIntoView({behavior:"smooth",block:"start"});
+  keepPlace();
 }
 
 
@@ -402,7 +425,7 @@ function showIntro(){
   intro.innerHTML = `<div class="intro-head"><h2>${esc(T("start_titel","Kundenumfrage & Workshop"))}</h2><p class="muted">${esc(T("start_text"))}</p></div>
     <div class="intro-cards">
       <div class="intro-card"><span class="num">1</span><h3>${esc(T("start_umfrage_titel"))}</h3><p>${esc(T("start_umfrage_text"))}</p></div>
-      <div class="intro-card ws"><span class="num">2</span><h3>${esc(T("start_ws_titel"))}</h3><p>${esc(T("start_ws_text"))}</p>
+      <div class="intro-card ws"><span class="num">2</span><h3>${esc(T("start_ws_titel"))}</h3><p>${esc(T("start_ws_text"))}</p>${T("ws_claim")?`<p class="claim">${esc(T("ws_claim"))}</p>`:""}
         ${dates.length?`<div class="ws-dates">${dates.map(d=>`<span class="ws-date">${esc(d)}</span>`).join("")}</div>`:""}</div>
     </div>
     <div class="nav" style="justify-content:flex-end"><button type="button" class="btn primary" id="startBtn">${esc(T("start_knopf","Umfrage starten"))} →</button></div>`;
