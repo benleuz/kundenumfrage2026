@@ -15,8 +15,7 @@ var TEXTE = {
  "lbl_firma": "Firma (optional)",
  "lbl_rolle": "Deine Funktion",
  "lbl_seit": "Kunde von Apriko seit",
- "lbl_leistungen": "Welche Leistungen nutzt ihr?",
- "kommentar_bereich": "Was möchtest du uns dazu noch sagen?",
+ "lbl_leistungen": "Welche Leistungen nutzt ihr bei Apriko?",
  "api_frage": "Wusstest du, dass du über unsere offene API praktisch jedes System an Apriko anbinden kannst?",
  "api_kommentar": "Welche Systeme würdest du gerne anbinden? (z. B. Zeiterfassung, Buchhaltung, Jobportale)",
  "api_hinweis": "Ui, dann musst du dich unbedingt für unseren Workshop «Die Zukunft ist heute.» anmelden! In einer Stunde zeigen wir dir, wie du mit unserer API und KI zum Beispiel ein eigenes Dashboard baust. Anmelden kannst du dich am Ende der Umfrage.",
@@ -296,19 +295,24 @@ var TOPICS = [
   "ki",
   "KI-Assistent in der Software",
   "Fragen stellen, Texte und Verträge entwerfen"
+ ],
+ [
+  "whatsapp",
+  "WhatsApp-Kommunikation",
+  "Mit Kandidaten und Temporärmitarbeitenden direkt über WhatsApp kommunizieren"
  ]
 ];
-var ROLES = ["Geschäftsleitung", "Disposition / Recruiting", "Lohn / Administration", "Buchhaltung / Finanzen", "IT", "Andere"];
+var ROLES = ["Geschäftsleitung", "Admin / Lohn / Fibu", "Berater / Recruiter"];
 var SINCE = ["weniger als 1 Jahr", "1–2 Jahre", "3–5 Jahre", "mehr als 5 Jahre"];
 var MA = ["bis 50", "51–200", "201–500", "über 500"];
-var SERVICES = ["Software", "BPO Lohn- und Debitoren", "BPO Finanzbuchhaltung (inkl. Kreditoren)"];
+var SERVICES = ["Nur Software", "Software und Lohn- und Debitorenverarbeitung", "Software und Lohn- und Debitorenverarbeitung sowie Finanzbuchhaltung"];
 var BPO_OPTIONS = [];
 var FORTSCHRITT = ["Ja, deutlich", "Ja, etwas", "Kaum", "Nein", "Kann ich nicht beurteilen"];
 var API_OPTIONS = ["Ja, und wir nutzen das bereits", "Ja, aber wir nutzen es (noch) nicht", "Nein, das war mir nicht bewusst", "Klingt spannend, bitte meldet euch bei uns"];
 var WS_TERMINE = ["Montag, 23. November 2026, Nachmittag", "Mittwoch, 25. November 2026, Vormittag", "Ich kann leider nicht, bitte informiert mich über weitere Termine", "Nein, danke"];
 var INSEL_OPTIONS = ["Ja", "Nein", "Weiss nicht"];
 var TENDENZ = ["Deutlich besser", "Etwas besser", "Gleich geblieben", "Etwas schlechter", "Deutlich schlechter", "Kann ich nicht beurteilen"];
-/* Optionen in «Leistungen», die den BPO-Abschnitt einblenden: alle, die «BPO» enthalten */
-var BPO_SERVICES = SERVICES.filter(function(s){ return /bpo/i.test(s); });
+/* Optionen in «Leistungen», die den BPO-Abschnitt einblenden: alle mit BPO / Lohn / Debitoren / Finanzbuchhaltung */
+var BPO_SERVICES = SERVICES.filter(function(s){ return /bpo|lohn|debitor|finanz/i.test(s); });
 /* Option in «API-Nutzung», die als Kontaktwunsch gilt: die letzte */
 var API_LEAD = API_OPTIONS[API_OPTIONS.length-1] || '';

@@ -52,7 +52,7 @@ function saveDraft(){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(state)
 function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY);}catch(e){} }
 const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const A = () => state.answers;
-const usesBpo = () => (A().services||[]).some(x => BPO_SERVICES.includes(x));
+const usesBpo = () => { const v = A().services; return (Array.isArray(v) ? v : [v]).some(x => BPO_SERVICES.includes(x)); };
 const ACTIVE = () => SECTIONS.filter(s => s.id!=="bpo" || usesBpo());
 /* Workshop: letzte Option = Absage; alle anderen brauchen Kontaktangaben */
 const wsChoice = () => A().ws_termin || "";
@@ -139,7 +139,7 @@ function render(){
       ${sel("seit",T("lbl_seit"),SINCE)}
       ${sel("ma",T("lbl_ma"),MA)}
     </div>
-    ${checks("services",T("lbl_leistungen"),SERVICES)}`;
+    ${radios("services",T("lbl_leistungen"),SERVICES)}`;
   } else if(s.kind==="rating"){
     body = head(s.title,s.lead) + `<div>${ratingRows(s.items)}</div>`;
     if(s.id==="funktion") body += radios("api",T("api_frage"),API_OPTIONS) + `<div id="apiHint" aria-live="polite">${apiHint()}</div>` + opt("api_txt",T("api_kommentar"))
