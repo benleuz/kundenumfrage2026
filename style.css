@@ -235,3 +235,18 @@ html{overflow-x:hidden}               /* Sicherheitsnetz gegen 1-px-Überstände
   .steps button[aria-current="step"]{flex:1 1 auto;padding:6px 10px}
   .steps button[aria-current="step"] .lbl{display:inline}
 }
+
+/* ===== Startbildschirm & Workshop ===== */
+.intro-screen{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,4vw,32px);display:flex;flex-direction:column;gap:22px}
+.intro-head{display:flex;flex-direction:column;gap:8px}
+.intro-head h2{font-size:clamp(24px,4vw,30px)}
+.intro-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:620px){.intro-cards{grid-template-columns:1fr}}
+.intro-card{position:relative;border:1px solid var(--line);border-radius:12px;padding:18px 18px 18px 18px;display:flex;flex-direction:column;gap:8px;background:var(--bg);min-width:0}
+.intro-card.ws{border-color:transparent;background:linear-gradient(var(--bg),var(--bg)) padding-box,var(--grad) border-box;border:2px solid transparent}
+.intro-card .num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:700 14px var(--f-mono);background:var(--grad);color:var(--on-grad)}
+.intro-card h3{font-size:17px}
+.intro-card p{color:var(--muted);font-size:15px}
+.ws-dates{display:flex;flex-wrap:wrap;gap:8px}
+.ws-date{font:600 13px var(--f-body);padding:6px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);border:1px solid var(--line)}
+.ws-sum{margin-top:6px}

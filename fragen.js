@@ -1,8 +1,15 @@
 /* Automatisch erzeugt aus Kundenumfrage-2026-Fragen.xlsx – Änderungen bitte in der Excel-Datei machen. */
 var TEXTE = {
- "kopf_eyebrow": "Kundenumfrage 2026 · ca. 8 Minuten",
+ "kopf_eyebrow": "Kundenumfrage & KI-Workshop 2026",
  "kopf_titel": "Wie zufrieden bist du mit Apriko?",
- "kopf_intro": "Deine Rückmeldung zu Software, Support und BPO-Services fliesst direkt in unsere Planung 2027 ein. Im Roadmap-Teil wählst du deine Top 3 für unsere nächsten Entwicklungen.",
+ "kopf_intro": "Deine Rückmeldung zu Software, Support und BPO fliesst direkt in unsere Planung 2027 ein. Und im Anschluss zeigen wir dir im Workshop, wie du mit KI und unserer API mehr aus Apriko herausholst.",
+ "start_titel": "Kundenumfrage & KI-Workshop",
+ "start_text": "Wir möchten Apriko gemeinsam mit dir weiterentwickeln. Dafür haben wir zwei Dinge für dich:",
+ "start_umfrage_titel": "Kundenumfrage · ca. 8 Minuten",
+ "start_umfrage_text": "Sag uns, wie zufrieden du mit Software, Support und BPO bist, und wähle deine Top 3 für unsere Roadmap.",
+ "start_ws_titel": "Workshop: KI & API in der Praxis · 1 Stunde",
+ "start_ws_text": "In einer Stunde zeigen wir dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust. Anmelden kannst du dich am Ende der Umfrage.",
+ "start_knopf": "Umfrage starten",
  "ueber_einleitung": "Damit wir die Antworten richtig einordnen können. Der Firmenname ist freiwillig.",
  "lbl_firma": "Firma (optional)",
  "lbl_rolle": "Deine Funktion",
@@ -24,6 +31,12 @@ var TEXTE = {
  "g_best": "Was schätzt du an Apriko am meisten?",
  "g_improve": "Was sollten wir als Erstes verbessern?",
  "gespraech": "Ich wünsche mir ein persönliches Gespräch zu meinem Feedback",
+ "ws_frage": "Möchtest du am Workshop teilnehmen?",
+ "ws_name": "Name",
+ "ws_mail": "E-Mail",
+ "ws_anzahl": "Anzahl Personen",
+ "ws_hinweis": "Die Details (Uhrzeit und Ort bzw. Zugangslink) schicken wir dir nach der Anmeldung per E-Mail.",
+ "ws_bestaetigung": "Deine Workshop-Anmeldung ist eingegangen. Wir melden uns mit den Details.",
  "mail_betreff": "Kundenumfrage 2026 – <Firma>",
  "mail_anrede": "Hallo Apriko-Team",
  "mail_text": "hier sind meine Antworten zur Apriko-Kundenumfrage 2026.",
@@ -202,6 +215,12 @@ var SECTIONS = [
     ""
    ]
   ]
+ },
+ {
+  "id": "workshop",
+  "title": "Workshop",
+  "kind": "workshop",
+  "lead": "KI & API in der Praxis: In einer Stunde zeigen wir dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust."
  }
 ];
 var TOPICS = [
@@ -263,6 +282,7 @@ var SERVICES = ["Software", "BPO Lohn- und Debitoren"];
 var BPO_OPTIONS = [];
 var FORTSCHRITT = ["Ja, deutlich", "Ja, etwas", "Kaum", "Nein", "Kann ich nicht beurteilen"];
 var API_OPTIONS = ["Ja, und wir nutzen das bereits", "Ja, aber wir nutzen es (noch) nicht", "Nein, das war mir nicht bewusst", "Klingt spannend, bitte meldet euch bei uns"];
+var WS_TERMINE = ["Montag, 23. November 2026, Nachmittag", "Mittwoch, 25. November 2026, Vormittag", "Ich kann leider nicht, bitte informiert mich über weitere Termine", "Nein, danke"];
 /* Option in «Leistungen», die den BPO-Abschnitt einblendet: die erste, die «BPO» enthält */
 var BPO_SERVICE = SERVICES.find(function(s){ return /bpo/i.test(s); }) || '';
 /* Option in «API-Nutzung», die als Kontaktwunsch gilt: die letzte */

@@ -31,9 +31,10 @@ Fragen und Texte änderst du in **Kundenumfrage-2026-Fragen.xlsx** (Blatt «Text
 
 ## So läuft es für den Kunden
 
-1. Umfrage ausfüllen (BPO-Teil erscheint nur, wenn BPO angehakt ist).
-2. «Antworten senden» → der Antwort-Code erscheint.
-3. «Per E-Mail senden» öffnet das Mailprogramm mit fertiger Nachricht an dich. Falls sich nichts öffnet: «Code kopieren» und selbst mailen.
+1. Startbildschirm: Umfrage + KI-/API-Workshop, «Umfrage starten».
+2. Umfrage ausfüllen (BPO-Teil erscheint nur, wenn BPO angehakt ist). Letzter Abschnitt: Workshop-Anmeldung (Termin, Name, E-Mail, Anzahl Personen).
+3. «Antworten senden» → gespeichert, Bestätigung inkl. Workshop-Termin. Nur im Rückfall erscheint der Antwort-Code.
+4. «Per E-Mail senden» öffnet das Mailprogramm mit fertiger Nachricht an dich. Falls sich nichts öffnet: «Code kopieren» und selbst mailen.
 
 ## Auswerten
 
@@ -42,6 +43,7 @@ Fragen und Texte änderst du in **Kundenumfrage-2026-Fragen.xlsx** (Blatt «Text
 3. Nur falls ein Kunde einen Code gemailt hat: Code oder ganze Mail ins Feld kopieren → «Hinzufügen».
 4. Doppelte Codes zählen nur einmal. Die Codes bleiben in diesem Browser gespeichert – du kannst laufend neue dazulegen.
 5. «CSV herunterladen» für Excel.
+6. **Workshop:** Block «Anmeldungen KI-/API-Workshop» zeigt Personen pro Termin, Kontaktliste und «E-Mail-Adressen kopieren» (für die Einladung per BCC).
 
 Die Codes sind nur in dem Browser gespeichert, in dem du sie eingefügt hast. Bewahre die Mails auf (oder die Codes in einer Textdatei), dann kannst du jederzeit neu einlesen.
 

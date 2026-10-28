@@ -17,6 +17,7 @@
       <p id="k_intro"></p>
   </div></header>
 <div class="wrap">
+  <section id="intro" class="intro-screen" hidden></section>
   <main id="survey" class="wrap" style="gap:16px">
     <nav class="steps" id="steps" aria-label="Abschnitte"></nav>
     <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
@@ -51,6 +52,10 @@ const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&l
 const A = () => state.answers;
 const usesBpo = () => !!BPO_SERVICE && (A().services||[]).includes(BPO_SERVICE);
 const ACTIVE = () => SECTIONS.filter(s => s.id!=="bpo" || usesBpo());
+/* Workshop: letzte Option = Absage; alle anderen brauchen Kontaktangaben */
+const wsChoice = () => A().ws_termin || "";
+const wsNeedsContact = () => !!wsChoice() && WS_TERMINE.length > 0 && wsChoice() !== WS_TERMINE[WS_TERMINE.length-1];
+const wsIsDate = () => !!wsChoice() && WS_TERMINE.indexOf(wsChoice()) > -1 && WS_TERMINE.indexOf(wsChoice()) < Math.max(0, WS_TERMINE.length-2);
 
 /* ---------- Render ---------- */
 const form = document.getElementById("form");
@@ -135,6 +140,19 @@ function render(){
       <div class="field"><label for="kmail">E-Mail oder Telefon</label><input type="text" id="kmail" name="kmail" value="${esc(A().kmail||'')}" autocomplete="email"></div>
     </div>` : ""}`;
   }
+  if(s.kind==="workshop"){
+    const need = wsNeedsContact();
+    body = head(s.title, s.lead||"") + `
+    ${radios("ws_termin",T("ws_frage"),WS_TERMINE)}
+    <div id="wsContact" ${need?'':'hidden'}>
+      <div class="grid2">
+        <div class="field"><label for="ws_name">${esc(T("ws_name","Name"))}</label><input type="text" id="ws_name" name="ws_name" value="${esc(A().ws_name||A().kname||'')}" autocomplete="name"></div>
+        <div class="field"><label for="ws_mail">${esc(T("ws_mail","E-Mail"))}</label><input type="email" id="ws_mail" name="ws_mail" value="${esc(A().ws_mail||'')}" autocomplete="email"></div>
+        <div class="field" id="wsAnzahlField" ${wsIsDate()?'':'hidden'}><label for="ws_anzahl">${esc(T("ws_anzahl","Anzahl Personen"))}</label><select id="ws_anzahl" name="ws_anzahl">${["1","2","3","4","5"].map(n=>`<option ${ (A().ws_anzahl||"1")===n?'selected':''}>${n}</option>`).join("")}</select></div>
+      </div>
+      ${T("ws_hinweis")?`<p class="note">${esc(T("ws_hinweis"))}</p>`:""}
+    </div>`;
+  }
   form.innerHTML = `<div class="panel">${body}${navRow()}</div>`;
   bindPanel();
   if(s.kind==="roadmap") renderBoard();
@@ -158,6 +176,7 @@ function collect(e){
   } else if(t.type==="checkbox"){ A()[t.name] = t.checked; }
   else if(t.type==="radio"){ if(t.checked) A()[t.name] = t.value; }
   else A()[t.name] = t.value;
+  if(t.name==="ws_termin"){ const c = document.getElementById("wsContact"); if(c) c.hidden = !wsNeedsContact(); const f = document.getElementById("wsAnzahlField"); if(f) f.hidden = !wsIsDate(); if(wsIsDate() && !A().ws_anzahl) A().ws_anzahl = "1"; }
   if(t.name==="services"){ renderSteps(); const eb = form.querySelector(".panel-head .eyebrow"); if(eb) eb.textContent = "Abschnitt " + (step+1) + " von " + ACTIVE().length; }
   saveDraft();
 }
@@ -232,6 +251,8 @@ function syncFromDom(){
 /* ---------- Submit ---------- */
 function buildPayload(){
   const answers = JSON.parse(JSON.stringify(A()));
+  if(!wsNeedsContact()){ delete answers.ws_name; delete answers.ws_mail; delete answers.ws_anzahl; }
+  if(!wsIsDate()) delete answers.ws_anzahl;
   if(!usesBpo()) Object.keys(answers).filter(k=>/^b_/.test(k)||k==="c_bpo"||k==="bpo_interest").forEach(k=>delete answers[k]);
   return {
     answers,
@@ -254,6 +275,10 @@ function missing(){
   const m = [];
   if(!A().rolle) m.push("Deine Funktion (Abschnitt 1)");
   if(A().nps==null) m.push("Weiterempfehlung 0–10 (Gesamteindruck)");
+  if(wsNeedsContact()){
+    if(!(A().ws_name||"").trim()) m.push("Name für den Workshop");
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((A().ws_mail||"").trim())) m.push("Gültige E-Mail für den Workshop");
+  }
   return m;
 }
 function renderSubmit(){
@@ -261,7 +286,8 @@ function renderSubmit(){
   const rated = Object.keys(A()).filter(k=>/^[qfsbg]_/.test(k)).length;
   form.innerHTML = `<div class="panel">
     <div class="panel-head"><span class="eyebrow">Fast geschafft</span><h2>Antworten absenden</h2>
-    <p class="muted">${rated} Bewertungen, ${p.roadmap.length} Roadmap-Prioritäten${A().firma?`, Firma: ${esc(A().firma)}`:', ohne Firmenangabe'}.</p></div>
+    <p class="muted">${rated} Bewertungen, ${p.roadmap.length} Roadmap-Prioritäten${A().firma?`, Firma: ${esc(A().firma)}`:', ohne Firmenangabe'}.</p>
+    ${wsIsDate()?`<p class="ws-sum">Workshop: <b>${esc(wsChoice())}</b> · ${esc(A().ws_anzahl||"1")} Person(en)</p>`:""}</div>
     ${m.length?`<div class="msg err"><b>Bitte noch ergänzen:</b><span>${m.map(esc).join("<br>")}</span></div>`:''}
     <div id="submitArea"></div>
     <div class="nav"><button type="button" class="btn ghost" id="prev">Zurück</button><button type="button" class="btn primary" id="send" ${m.length?'disabled':''}>Antworten senden</button></div>
@@ -285,7 +311,7 @@ async function send(){
       clearTimeout(to);
       if(r.ok){
         clearDraft(); sent = true;
-        area.innerHTML = `<div class="msg ok"><b>Vielen Dank! Deine Antworten sind bei uns angekommen.</b><span class="muted">Du kannst dieses Fenster jetzt schliessen.</span></div>`;
+        area.innerHTML = `<div class="msg ok"><b>Vielen Dank! Deine Antworten sind bei uns angekommen.</b>${wsIsDate()?`<span><b>${esc(T("ws_bestaetigung","Deine Workshop-Anmeldung ist eingegangen."))}</b><br>Termin: ${esc(wsChoice())}</span>`:""}<span class="muted">Du kannst dieses Fenster jetzt schliessen.</span></div>`;
         btn.hidden = true; const pv = document.getElementById("prev"); if(pv) pv.hidden = true;
         return;
       }
@@ -330,7 +356,24 @@ function go(i){
 
 ["eyebrow","titel","intro"].forEach(k=>{ const v = T("kopf_"+k); const el = document.getElementById("k_"+k); if(el && v) el.textContent = v; });
 if(T("kopf_titel")) document.title = "Apriko " + (T("kopf_eyebrow").split("·")[0].trim() || "Kundenumfrage");
-loadDraft(); render();
+/* ---------- Startbildschirm ---------- */
+const intro = document.getElementById("intro"), survey = document.getElementById("survey");
+function showIntro(){
+  const dates = WS_TERMINE.slice(0, Math.max(0, WS_TERMINE.length-2));
+  intro.innerHTML = `<div class="intro-head"><h2>${esc(T("start_titel","Kundenumfrage & Workshop"))}</h2><p class="muted">${esc(T("start_text"))}</p></div>
+    <div class="intro-cards">
+      <div class="intro-card"><span class="num">1</span><h3>${esc(T("start_umfrage_titel"))}</h3><p>${esc(T("start_umfrage_text"))}</p></div>
+      <div class="intro-card ws"><span class="num">2</span><h3>${esc(T("start_ws_titel"))}</h3><p>${esc(T("start_ws_text"))}</p>
+        ${dates.length?`<div class="ws-dates">${dates.map(d=>`<span class="ws-date">${esc(d)}</span>`).join("")}</div>`:""}</div>
+    </div>
+    <div class="nav" style="justify-content:flex-end"><button type="button" class="btn primary" id="startBtn">${esc(T("start_knopf","Umfrage starten"))} →</button></div>`;
+  intro.hidden = false; survey.hidden = true;
+  document.getElementById("startBtn").onclick = ()=>{ started = true; try{ sessionStorage.setItem("apriko-umfrage-start","1"); }catch(e){} intro.hidden = true; survey.hidden = false; render(); survey.scrollIntoView({behavior:"smooth",block:"start"}); };
+}
+let started = false;
+try{ started = sessionStorage.getItem("apriko-umfrage-start")==="1"; }catch(e){}
+loadDraft();
+if(!started && !Object.keys(A()).length) showIntro(); else render();
 })();
 </script>
 </body>
