@@ -250,3 +250,13 @@ html{overflow-x:hidden}               /* Sicherheitsnetz gegen 1-px-Überstände
 .ws-dates{display:flex;flex-wrap:wrap;gap:8px}
 .ws-date{font:600 13px var(--f-body);padding:6px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);border:1px solid var(--line)}
 .ws-sum{margin-top:6px}
+
+/* ===== Workshop-Sperre ===== */
+.ws-gate{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:12px;border:2px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,var(--grad) border-box}
+.ws-gate b{font:700 18px var(--f-display)}
+.meter{position:relative;height:10px;border-radius:6px;background:var(--chip);overflow:visible}
+.meter i{display:block;height:100%;border-radius:6px;background:var(--grad)}
+.meter em{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.6}
+.gate-links{display:flex;flex-wrap:wrap;gap:8px}
+.checks label.locked{opacity:.5;cursor:not-allowed}
+.lock{font-size:12px}

@@ -32,7 +32,7 @@ Fragen und Texte änderst du in **Kundenumfrage-2026-Fragen.xlsx** (Blatt «Text
 ## So läuft es für den Kunden
 
 1. Startbildschirm: Umfrage + KI-/API-Workshop, «Umfrage starten».
-2. Umfrage ausfüllen (BPO-Teil erscheint nur, wenn BPO angehakt ist). Letzter Abschnitt: Workshop-Anmeldung (Termin, Name, E-Mail, Anzahl Personen).
+2. Umfrage ausfüllen (BPO-Teil erscheint nur, wenn BPO angehakt ist). Letzter Abschnitt: Workshop-Anmeldung (Termin, Name, E-Mail, Anzahl Personen). Die Termine sind erst wählbar, wenn mindestens 75 % der Umfrage ausgefüllt sind (Wert und Text im Blatt «Texte»: `ws_mindestquote`, `ws_sperre_…`).
 3. «Antworten senden» → gespeichert, Bestätigung inkl. Workshop-Termin. Nur im Rückfall erscheint der Antwort-Code.
 4. «Per E-Mail senden» öffnet das Mailprogramm mit fertiger Nachricht an dich. Falls sich nichts öffnet: «Code kopieren» und selbst mailen.
 

@@ -87,7 +87,7 @@ function renderResults(){
     const reg = R.filter(r=>wsDates.includes(r.answers.ws_termin));
     const later = R.filter(r=>r.answers.ws_termin && r.answers.ws_termin===WS_TERMINE[WS_TERMINE.length-2] && wsDates.length < WS_TERMINE.length-1);
     const persons = d=>R.filter(r=>r.answers.ws_termin===d).reduce((a,r)=>a+(parseInt(r.answers.ws_anzahl,10)||1),0);
-    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Workshop</span><h2>Anmeldungen KI-/API-Workshop</h2><p class="note">${reg.length} Anmeldungen · ${wsDates.reduce((a,d)=>a+persons(d),0)} Personen</p></div>
+    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Workshop</span><h2>Anmeldungen Workshop «${esc(typeof T==="function"?T("ws_titel","Die Zukunft ist heute."):"Die Zukunft ist heute.")}»</h2><p class="note">${reg.length} Anmeldungen · ${wsDates.reduce((a,d)=>a+persons(d),0)} Personen</p></div>
       <div class="kpis" style="grid-template-columns:repeat(${Math.max(1,wsDates.length)},1fr)">${wsDates.map(d=>`<div class="kpi"><span>${esc(d)}</span><b>${persons(d)}</b><span>Personen aus ${R.filter(r=>r.answers.ws_termin===d).length} Anmeldung(en)</span></div>`).join("")}</div>
       ${reg.length?`<div class="tablewrap"><table><thead><tr><th>Termin</th><th>Name</th><th>E-Mail</th><th>Firma</th><th>Pers.</th></tr></thead><tbody>${
         reg.map(r=>`<tr><td>${esc(r.answers.ws_termin)}</td><td>${esc(r.answers.ws_name||'')}</td><td style="user-select:all">${esc(r.answers.ws_mail||'')}</td><td>${esc(r.answers.firma||'anonym')}</td><td>${esc(r.answers.ws_anzahl||'1')}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Noch keine Anmeldungen.</p>'}

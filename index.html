@@ -55,6 +55,24 @@ const ACTIVE = () => SECTIONS.filter(s => s.id!=="bpo" || usesBpo());
 /* Workshop: letzte Option = Absage; alle anderen brauchen Kontaktangaben */
 const wsChoice = () => A().ws_termin || "";
 const wsNeedsContact = () => !!wsChoice() && WS_TERMINE.length > 0 && wsChoice() !== WS_TERMINE[WS_TERMINE.length-1];
+/* Ausfüllgrad: Pflicht-/Kernfragen pro aktivem Abschnitt (Freitext + Firma zählen nicht; «k. A.» zählt als beantwortet) */
+function completion(){
+  const has = v => Array.isArray(v) ? v.length>0 : (v!==undefined && v!==null && String(v).trim()!=="");
+  let done=0, total=0; const open=[];
+  ACTIVE().forEach((s,idx)=>{
+    const keys=[];
+    if(s.kind==="about"){ if(T("lbl_rolle")&&ROLES.length) keys.push("rolle"); if(T("lbl_seit")&&SINCE.length) keys.push("seit"); if(T("lbl_leistungen")&&SERVICES.length) keys.push("services"); }
+    (s.items||[]).forEach(it=>keys.push(it[0]));
+    if(s.id==="funktion" && T("api_frage") && API_OPTIONS.length) keys.push("api");
+    if(s.kind==="overall"){ keys.push("nps"); if(T("fortschritt_frage") && FORTSCHRITT.length) keys.push("g_fortschritt"); }
+    let d = keys.filter(k=>has(A()[k])).length, t = keys.length;
+    if(s.kind==="roadmap"){ t++; if(state.roadmap.prio.length) d++; }
+    done+=d; total+=t; if(t>d) open.push({idx, title:s.title, n:t-d});
+  });
+  return {done, total, pct: total ? Math.round(done/total*100) : 100, open};
+}
+const WS_MIN = () => parseInt(T("ws_mindestquote","75"),10) || 75;
+const wsAllowed = () => completion().pct >= WS_MIN();
 const wsIsDate = () => !!wsChoice() && WS_TERMINE.indexOf(wsChoice()) > -1 && WS_TERMINE.indexOf(wsChoice()) < Math.max(0, WS_TERMINE.length-2);
 
 /* ---------- Render ---------- */
@@ -141,9 +159,19 @@ function render(){
     </div>` : ""}`;
   }
   if(s.kind==="workshop"){
+    const c = completion(), ok = c.pct >= WS_MIN();
+    if(!ok && wsIsDate()){ A().ws_termin = ""; saveDraft(); }
     const need = wsNeedsContact();
-    body = head(s.title, s.lead||"") + `
-    ${radios("ws_termin",T("ws_frage"),WS_TERMINE)}
+    const dateCount = Math.max(0, WS_TERMINE.length-2);
+    const gate = ok ? "" : `<div class="ws-gate">
+        <b>${esc(T("ws_sperre_titel","Hmm … da geht aber noch mehr!"))}</b>
+        <span>${esc(T("ws_sperre_text","").replace("{prozent}", c.pct).replace("{mindest}", WS_MIN()))}</span>
+        <div class="meter" role="img" aria-label="${c.pct} % ausgefüllt"><i style="width:${c.pct}%"></i><em style="left:${WS_MIN()}%"></em></div>
+        <span class="note">${c.pct} % ausgefüllt · ${c.done} von ${c.total} Fragen</span>
+        ${c.open.length?`<span class="note">${esc(T("ws_sperre_offen","Hier fehlt noch etwas:"))}</span><div class="gate-links">${c.open.map(o=>`<button type="button" class="btn ghost small" data-go="${o.idx}">${esc(o.title)} · ${o.n} offen</button>`).join("")}</div>`:""}
+      </div>`;
+    body = head(T("ws_titel", s.title), s.lead||"") + gate + `
+    ${T("ws_frage") && WS_TERMINE.length ? `<div class="field"><span class="label" id="ws_termin_l">${esc(T("ws_frage"))}</span><div class="checks" role="radiogroup" aria-labelledby="ws_termin_l">${WS_TERMINE.map((x,i)=>{ const locked = !ok && i < dateCount; return `<label class="${locked?'locked':''}"><input type="radio" name="ws_termin" id="ws_termin_${i}" value="${esc(x)}" ${A().ws_termin===x?'checked':''} ${locked?'disabled':''}>${esc(x)}${locked?' <span class="lock" aria-hidden="true">🔒</span>':''}</label>`; }).join("")}</div></div>` : ""}
     <div id="wsContact" ${need?'':'hidden'}>
       <div class="grid2">
         <div class="field"><label for="ws_name">${esc(T("ws_name","Name"))}</label><input type="text" id="ws_name" name="ws_name" value="${esc(A().ws_name||A().kname||'')}" autocomplete="name"></div>
@@ -159,6 +187,7 @@ function render(){
 }
 
 function bindPanel(){
+  form.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(+b.dataset.go));
   const p = document.getElementById("prev"), n = document.getElementById("next");
   if(p) p.onclick = ()=>go(step-1);
   if(n) n.onclick = ()=>go(step+1);
@@ -275,6 +304,7 @@ function missing(){
   const m = [];
   if(!A().rolle) m.push("Deine Funktion (Abschnitt 1)");
   if(A().nps==null) m.push("Weiterempfehlung 0–10 (Gesamteindruck)");
+  if(wsIsDate() && !wsAllowed()) m.push(T("ws_sperre_titel","Hmm … da geht aber noch mehr!") + " Für die Workshop-Anmeldung bitte mindestens " + WS_MIN() + " % der Umfrage ausfüllen.");
   if(wsNeedsContact()){
     if(!(A().ws_name||"").trim()) m.push("Name für den Workshop");
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((A().ws_mail||"").trim())) m.push("Gültige E-Mail für den Workshop");
@@ -355,7 +385,7 @@ function go(i){
 
 
 ["eyebrow","titel","intro"].forEach(k=>{ const v = T("kopf_"+k); const el = document.getElementById("k_"+k); if(el && v) el.textContent = v; });
-if(T("kopf_titel")) document.title = "Apriko " + (T("kopf_eyebrow").split("·")[0].trim() || "Kundenumfrage");
+if(T("kopf_titel")) document.title = "Apriko Kundenumfrage 2026";
 /* ---------- Startbildschirm ---------- */
 const intro = document.getElementById("intro"), survey = document.getElementById("survey");
 function showIntro(){

@@ -1,14 +1,14 @@
 /* Automatisch erzeugt aus Kundenumfrage-2026-Fragen.xlsx – Änderungen bitte in der Excel-Datei machen. */
 var TEXTE = {
- "kopf_eyebrow": "Kundenumfrage & KI-Workshop 2026",
+ "kopf_eyebrow": "Kundenumfrage 2026 & Workshop «Die Zukunft ist heute.»",
  "kopf_titel": "Wie zufrieden bist du mit Apriko?",
- "kopf_intro": "Deine Rückmeldung zu Software, Support und BPO fliesst direkt in unsere Planung 2027 ein. Und im Anschluss zeigen wir dir im Workshop, wie du mit KI und unserer API mehr aus Apriko herausholst.",
- "start_titel": "Kundenumfrage & KI-Workshop",
+ "kopf_intro": "Deine Rückmeldung zu Software, Support und BPO fliesst direkt in unsere Planung 2027 ein. Und im Workshop «Die Zukunft ist heute.» zeigen wir dir, wie du mit KI und unserer API mehr aus Apriko herausholst.",
+ "start_titel": "Kundenumfrage & Workshop",
  "start_text": "Wir möchten Apriko gemeinsam mit dir weiterentwickeln. Dafür haben wir zwei Dinge für dich:",
  "start_umfrage_titel": "Kundenumfrage · ca. 8 Minuten",
  "start_umfrage_text": "Sag uns, wie zufrieden du mit Software, Support und BPO bist, und wähle deine Top 3 für unsere Roadmap.",
- "start_ws_titel": "Workshop: KI & API in der Praxis · 1 Stunde",
- "start_ws_text": "In einer Stunde zeigen wir dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust. Anmelden kannst du dich am Ende der Umfrage.",
+ "start_ws_titel": "Workshop: Die Zukunft ist heute.",
+ "start_ws_text": "KI & API in der Praxis, 1 Stunde: Wir zeigen dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust. Anmelden kannst du dich am Ende der Umfrage.",
  "start_knopf": "Umfrage starten",
  "ueber_einleitung": "Damit wir die Antworten richtig einordnen können. Der Firmenname ist freiwillig.",
  "lbl_firma": "Firma (optional)",
@@ -31,12 +31,17 @@ var TEXTE = {
  "g_best": "Was schätzt du an Apriko am meisten?",
  "g_improve": "Was sollten wir als Erstes verbessern?",
  "gespraech": "Ich wünsche mir ein persönliches Gespräch zu meinem Feedback",
+ "ws_titel": "Die Zukunft ist heute.",
  "ws_frage": "Möchtest du am Workshop teilnehmen?",
  "ws_name": "Name",
  "ws_mail": "E-Mail",
  "ws_anzahl": "Anzahl Personen",
  "ws_hinweis": "Die Details (Uhrzeit und Ort bzw. Zugangslink) schicken wir dir nach der Anmeldung per E-Mail.",
  "ws_bestaetigung": "Deine Workshop-Anmeldung ist eingegangen. Wir melden uns mit den Details.",
+ "ws_mindestquote": "75",
+ "ws_sperre_titel": "Hmm … da geht aber noch mehr!",
+ "ws_sperre_text": "Du hast erst {prozent} % der Umfrage ausgefüllt. Um an unserem Workshop teilzunehmen, bitten wir dich, uns zuerst dein Feedback zu geben. Ab {mindest} % kannst du dich anmelden – das dauert nur noch ein paar Minuten.",
+ "ws_sperre_offen": "Hier fehlt noch etwas:",
  "mail_betreff": "Kundenumfrage 2026 – <Firma>",
  "mail_anrede": "Hallo Apriko-Team",
  "mail_text": "hier sind meine Antworten zur Apriko-Kundenumfrage 2026.",
@@ -220,7 +225,7 @@ var SECTIONS = [
   "id": "workshop",
   "title": "Workshop",
   "kind": "workshop",
-  "lead": "KI & API in der Praxis: In einer Stunde zeigen wir dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust."
+  "lead": "KI & API in der Praxis, 1 Stunde: Wir zeigen dir, wie du aus deiner Apriko-Umgebung zum Beispiel ein eigenes Dashboard baust."
  }
 ];
 var TOPICS = [
