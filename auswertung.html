@@ -58,8 +58,9 @@ function avg(arr){ const v = arr.filter(x=>x!=null&&x!=="na"&&x!=="").map(Number
 function color(v,max){ const r=v/max; return r>=.75?"var(--good)":r>=.55?"var(--warn)":"var(--bad)"; }
 let latest = [];
 function renderResults(){
-  const R = latest, n = R.length;
-  if(!n){ results.innerHTML = `<div class="panel"><div class="panel-head"><span class="eyebrow">Auswertung</span><h2>Noch keine Antworten</h2><p class="muted">Füg oben die Antwort-Codes aus den Kunden-Mails ein. Danach erscheinen hier NPS, Bewertungen pro Bereich, die Roadmap-Rangliste und alle Kommentare.</p></div></div>`; return; }
+  const ALL = latest;                                   // inkl. Neukunden-Workshop-Anmeldungen
+  const R = ALL.filter(r=>r.kind!=="workshop"), n = R.length;   // nur Umfrage-Antworten
+  if(!ALL.length){ results.innerHTML = `<div class="panel"><div class="panel-head"><span class="eyebrow">Auswertung</span><h2>Noch keine Antworten</h2><p class="muted">Füg oben die Antwort-Codes aus den Kunden-Mails ein. Danach erscheinen hier NPS, Bewertungen pro Bereich, die Roadmap-Rangliste und alle Kommentare.</p></div></div>`; return; }
   const nps = R.map(r=>r.answers.nps).filter(x=>x!=null).map(Number);
   const pro = nps.filter(x=>x>=9).length, det = nps.filter(x=>x<=6).length;
   const npsScore = nps.length? Math.round((pro-det)/nps.length*100) : null;
@@ -100,13 +101,13 @@ function renderResults(){
   // Workshop-Anmeldungen
   if(typeof WS_TERMINE!=="undefined" && WS_TERMINE.length){
     const wsDates = WS_TERMINE.slice(0, Math.max(0, WS_TERMINE.length-2));
-    const reg = R.filter(r=>wsDates.includes(r.answers.ws_termin));
-    const later = R.filter(r=>r.answers.ws_termin && r.answers.ws_termin===WS_TERMINE[WS_TERMINE.length-2] && wsDates.length < WS_TERMINE.length-1);
-    const regs = d=>R.filter(r=>r.answers.ws_termin===d).length;
-    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Workshop</span><h2>Anmeldungen Workshop «${esc(typeof T==="function"?T("ws_titel","Die Zukunft ist heute."):"Die Zukunft ist heute.")}»</h2><p class="note">${reg.length} Anmeldungen · online via Microsoft Teams</p></div>
+    const reg = ALL.filter(r=>wsDates.includes(r.answers.ws_termin));
+    const later = ALL.filter(r=>r.answers.ws_termin && r.answers.ws_termin===WS_TERMINE[WS_TERMINE.length-2] && wsDates.length < WS_TERMINE.length-1);
+    const regs = d=>ALL.filter(r=>r.answers.ws_termin===d).length;
+    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Workshop</span><h2>Anmeldungen Workshop «${esc(typeof T==="function"?T("ws_titel","Die Zukunft ist heute."):"Die Zukunft ist heute.")}»</h2><p class="note">${reg.length} Anmeldungen (${reg.filter(r=>r.kind==="workshop").length} Neukunden) · online via Microsoft Teams</p></div>
       <div class="kpis" style="grid-template-columns:repeat(${Math.max(1,wsDates.length)},1fr)">${wsDates.map(d=>`<div class="kpi"><span>${esc(d)}</span><b>${regs(d)}</b><span>Anmeldung(en)</span></div>`).join("")}</div>
-      ${reg.length?`<div class="tablewrap"><table><thead><tr><th>Termin</th><th>Name</th><th>E-Mail</th><th>Firma</th></tr></thead><tbody>${
-        reg.map(r=>`<tr><td>${esc(r.answers.ws_termin)}</td><td>${esc(r.answers.ws_name||'')}</td><td style="user-select:all">${esc(r.answers.ws_mail||'')}</td><td>${esc(r.answers.firma||'anonym')}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Noch keine Anmeldungen.</p>'}
+      ${reg.length?`<div class="tablewrap"><table><thead><tr><th>Termin</th><th>Name</th><th>E-Mail</th><th>Firma</th><th>Herkunft</th></tr></thead><tbody>${
+        reg.map(r=>`<tr><td>${esc(r.answers.ws_termin)}</td><td>${esc(r.answers.ws_name||'')}</td><td style="user-select:all">${esc(r.answers.ws_mail||'')}</td><td>${esc(r.answers.firma||'anonym')}</td><td>${r.kind==="workshop"?'<span class="ws-date">Neukunde</span>':'Umfrage'}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Noch keine Anmeldungen.</p>'}
       ${later.length?`<div><h3>Möchten über weitere Termine informiert werden (${later.length})</h3>${later.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')}</div>${esc(r.answers.ws_name||'')} · ${esc(r.answers.ws_mail||'')}</div>`).join("")}</div>`:''}
       ${reg.length?`<div class="nav" style="justify-content:flex-start"><button type="button" class="btn ghost" id="wsCopy">E-Mail-Adressen kopieren</button><span class="note" id="wsNote"></span></div>`:''}</div>`;
   }
@@ -144,11 +145,11 @@ function renderResults(){
     cb?`<div><h3>Gesprächswünsche</h3>${R.filter(r=>r.answers.callback).map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')}</div>${esc(r.answers.kname||'')} · ${esc(r.answers.kmail||'')}</div>`).join("")}</div>`:''}</div>`;
   // Einzelne Antworten mit Löschen
   const fmt = d=>{ try{ return new Date(d).toLocaleString("de-CH",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } };
-  const sorted = R.map((r,i)=>({r,i})).sort((a,b)=>String(b.r._created||b.r.submittedAt||"").localeCompare(String(a.r._created||a.r.submittedAt||"")));
-  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Einzelne Antworten</span><h2>Alle Antworten (${n})</h2>
+  const sorted = ALL.map((r,i)=>({r,i})).sort((a,b)=>String(b.r._created||b.r.submittedAt||"").localeCompare(String(a.r._created||a.r.submittedAt||"")));
+  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Einzelne Antworten</span><h2>Alle Einträge (${ALL.length})</h2>
     <p class="note">Tests oder Doppelte hier löschen, damit sie nicht in die Auswertung einfliessen. Gelöschte Datenbank-Antworten sind endgültig weg.</p></div>
     <div class="tablewrap"><table class="answers"><thead><tr><th>Eingegangen</th><th>Firma</th><th>Funktion</th><th>NPS</th><th>Quelle</th><th></th></tr></thead><tbody>${
-    sorted.map(({r,i})=>`<tr data-i="${i}"><td>${esc(fmt(r._created||r.submittedAt))}</td><td>${esc(r.answers.firma||"anonym")}</td><td>${esc(r.answers.rolle||"")}</td><td>${esc(r.answers.nps??"")}</td><td>${r._src==="db"?"Datenbank":"Code"}</td>
+    sorted.map(({r,i})=>`<tr data-i="${i}"><td>${esc(fmt(r._created||r.submittedAt))}</td><td>${esc(r.answers.firma||"anonym")}</td><td>${esc(r.answers.rolle||"")}</td><td>${esc(r.answers.nps??"")}</td><td>${r.kind==="workshop"?"Neukunden-Einladung":(r._src==="db"?"Umfrage":"Umfrage (Code)")}</td>
       <td class="act"><button type="button" class="btn ghost small del">Löschen</button><span class="confirm" hidden>Wirklich löschen? <button type="button" class="btn primary small yes">Ja, löschen</button> <button type="button" class="btn ghost small no">Abbrechen</button></span><span class="note st"></span></td></tr>`).join("")}</tbody></table></div></div>`;
   html += `<div class="panel"><div class="panel-head"><h2>Rohdaten</h2><p class="note">Alle Antworten als CSV (Semikolon-getrennt, für Excel).</p></div>
     <div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="csvSave">CSV herunterladen</button><button type="button" class="btn ghost" id="csvCopy">CSV kopieren</button><span class="note" id="csvNote"></span></div></div>`;
@@ -157,7 +158,7 @@ function renderResults(){
   const wsc = document.getElementById("wsCopy");
   if(wsc) wsc.onclick = async ()=>{
     const wsDates = WS_TERMINE.slice(0, Math.max(0, WS_TERMINE.length-2));
-    const list = latest.filter(r=>wsDates.includes(r.answers.ws_termin)).map(r=>r.answers.ws_mail).filter(Boolean);
+    const list = latest.filter(r=>r && wsDates.includes(r.answers.ws_termin)).map(r=>r.answers.ws_mail).filter(Boolean);
     const txt = [...new Set(list)].join("; "), note = document.getElementById("wsNote");
     try{ await navigator.clipboard.writeText(txt); note.textContent = list.length + " Adressen kopiert (für BCC)."; }catch(e){ note.textContent = txt; }
   };
@@ -186,11 +187,11 @@ function renderResults(){
     document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500); };
 }
 function toCsv(){
-  const keys = ["firma","rolle","seit","ma","services"]; SECTIONS.filter(s=>s.items).forEach(s=>{ s.items.forEach(i=>keys.push(i[0])); keys.push("c_"+s.id); });
+  const keys = ["kind","firma","rolle","seit","ma","services"]; SECTIONS.filter(s=>s.items).forEach(s=>{ s.items.forEach(i=>keys.push(i[0])); keys.push("c_"+s.id); });
   keys.push("api","api_txt","insel","insel_txt","trend_sw","trend_bpo","c_bpo","bpo_interest","c_roadmap","nps","g_fortschritt","g_fortschritt_txt","g_total","g_preis","g_best","g_improve","callback","kname","kmail","ws_termin","ws_name","ws_mail");
   const q = v=>'"'+String(v==null?"":Array.isArray(v)?v.join(", "):v).replace(/"/g,'""')+'"';
   const head = keys.concat(["roadmap","eingereicht"]);
-  const rows = latest.map(r=>keys.map(k=>q(r.answers[k])).concat([q((r.roadmap||[]).map(x=>x.rank+". "+x.title).join(" | ")), q(r.submittedAt)]).join(";"));
+  const rows = latest.map(r=>keys.map(k=>q(k==="kind" ? (r.kind==="workshop" ? "Neukunde Workshop" : "Umfrage") : r.answers[k])).concat([q((r.roadmap||[]).map(x=>x.rank+". "+x.title).join(" | ")), q(r.submittedAt)]).join(";"));
   return [head.join(";")].concat(rows).join("\r\n");
 }
 
@@ -213,7 +214,7 @@ async function loadDb(){
   if(!token) return;
   dbInfo2.textContent = "Lade …";
   try{
-    const r = await fetch(SUPABASE_URL + "/rest/v1/umfrage_antworten?select=id,created_at,firma,payload&umfrage=eq." + UMFRAGE_ID + "&order=created_at.desc&limit=5000",
+    const r = await fetch(SUPABASE_URL + "/rest/v1/umfrage_antworten?select=id,created_at,firma,payload&umfrage=in.(" + UMFRAGE_ID + ",workshop-2026)&order=created_at.desc&limit=5000",
       { headers:{ "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token } });
     if(r.status === 401){ token = null; try{ sessionStorage.removeItem("apriko-umfrage-token"); }catch(e){} showLogged(false); dbInfo.textContent = "Sitzung abgelaufen, bitte neu anmelden."; return; }
     if(!r.ok) throw new Error(r.status);

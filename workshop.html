@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Apriko Workshop «Die Zukunft ist heute.»</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+.inv{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:760px){.inv{grid-template-columns:1fr}}
+.inv-about{display:flex;flex-direction:column;gap:16px}
+.inv-about ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.inv-about li{display:flex;gap:10px;align-items:flex-start}
+.inv-about li::before{content:"";flex:0 0 10px;height:10px;margin-top:7px;border-radius:50%;background:var(--grad)}
+.inv-facts{display:flex;flex-wrap:wrap;gap:8px}
+.inv-fact{font:600 13px var(--f-body);padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg)}
+.inv form{display:flex;flex-direction:column;gap:16px}
+.err-list{color:var(--bad);font-size:14px}
+</style>
+</head>
+<body>
+  <header class="brandbar"><div class="inner">
+      <img class="logo" src="logo.png" alt="Apriko" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="wordmark" hidden>Apriko</span>
+      <span class="eyebrow" id="h_eyebrow">Einladung · Online-Workshop</span>
+      <h1 id="h_titel">Die Zukunft ist heute.</h1>
+      <p id="h_intro"></p>
+  </div></header>
+<div class="wrap" style="padding-top:24px">
+  <div class="inv">
+    <section class="panel inv-about" id="about"></section>
+    <section class="panel" id="signup"></section>
+  </div>
+</div>
+<script src="fragen.js"></script>
+<script>
+(function(){
+"use strict";
+var SUPABASE_URL = "https://doidwhwjmdqnazcullsq.supabase.co";
+var SUPABASE_KEY = "sb_publishable_-CChsDaC2wuqOCF5VobHfQ_LG02deLD";
+var UMFRAGE_ID   = "workshop-2026";
+var EMPFAENGER   = T("empfaenger","hello@apriko.com");
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* Termine: alle Daten + «weitere Termine»; «Nein, danke» braucht es hier nicht */
+const DATES = WS_TERMINE.slice(0, Math.max(0, WS_TERMINE.length-2));
+const LATER = WS_TERMINE.length >= 2 ? WS_TERMINE[WS_TERMINE.length-2] : "";
+const CHOICES = DATES.concat(LATER ? [LATER] : []);
+
+document.getElementById("h_eyebrow").textContent = T("neu_eyebrow","Einladung · Online-Workshop");
+document.getElementById("h_titel").textContent = T("ws_titel","Die Zukunft ist heute.");
+document.getElementById("h_intro").textContent = T("neu_intro");
+
+const punkte = T("neu_punkte").split("|").map(s=>s.trim()).filter(Boolean);
+document.getElementById("about").innerHTML = `
+  <div class="panel-head"><span class="eyebrow">Was dich erwartet</span>
+    <h2>KI &amp; API in der Praxis</h2></div>
+  ${punkte.length?`<ul>${punkte.map(p=>`<li><span>${esc(p)}</span></li>`).join("")}</ul>`:""}
+  ${T("ws_claim")?`<p class="claim">${esc(T("ws_claim"))}</p>`:""}
+  <div class="inv-facts"><span class="inv-fact">1 Stunde</span><span class="inv-fact">Online via Microsoft Teams</span></div>
+  ${DATES.length?`<div class="ws-dates">${DATES.map(d=>`<span class="ws-date">${esc(d)}</span>`).join("")}</div>`:""}`;
+
+const signup = document.getElementById("signup");
+function renderForm(){
+  signup.innerHTML = `
+  <div class="panel-head"><h2>${esc(T("neu_form_titel","Jetzt anmelden"))}</h2></div>
+  <form id="f" novalidate>
+    <div class="field"><span class="label" id="t_l">${esc(T("neu_frage","Wann passt es dir?"))}</span>
+      <div class="checks" role="radiogroup" aria-labelledby="t_l">${CHOICES.map((x,i)=>`<label><input type="radio" name="termin" id="termin_${i}" value="${esc(x)}">${esc(x)}</label>`).join("")}</div></div>
+    <div class="field"><label for="firma">${esc(T("neu_firma","Firma"))}</label><input type="text" id="firma" autocomplete="organization" required></div>
+    <div class="field"><label for="name">${esc(T("ws_name","Name"))}</label><input type="text" id="name" autocomplete="name" required></div>
+    <div class="field"><label for="mail">${esc(T("ws_mail","E-Mail"))}</label><input type="email" id="mail" autocomplete="email" required></div>
+    ${T("ws_hinweis")?`<p class="note">${esc(T("ws_hinweis"))}</p>`:""}
+    <div id="errs" class="err-list" aria-live="polite"></div>
+    <div class="nav" style="justify-content:flex-end"><button type="submit" class="btn primary" id="go">${esc(T("neu_knopf","Anmelden"))}</button></div>
+  </form>`;
+  document.getElementById("f").addEventListener("submit", submit);
+}
+
+async function submit(e){
+  e.preventDefault();
+  const termin = (document.querySelector('input[name="termin"]:checked')||{}).value || "";
+  const firma = document.getElementById("firma").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const mail = document.getElementById("mail").value.trim();
+  const errs = [];
+  if(!termin) errs.push("Bitte wähle einen Termin.");
+  if(!firma) errs.push("Bitte gib deine Firma an.");
+  if(!name) errs.push("Bitte gib deinen Namen an.");
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) errs.push("Bitte gib eine gültige E-Mail-Adresse an.");
+  const box = document.getElementById("errs"); box.innerHTML = errs.map(esc).join("<br>");
+  if(errs.length) return;
+  const btn = document.getElementById("go"); btn.disabled = true; btn.textContent = "Wird gesendet …";
+  const payload = { kind:"workshop", quelle:"neukunde", answers:{ firma, ws_name:name, ws_mail:mail, ws_termin:termin }, submittedAt:new Date().toISOString(), version:2 };
+  let ok = false;
+  try{
+    const ctl = new AbortController(); const to = setTimeout(()=>ctl.abort(), 15000);
+    const r = await fetch(SUPABASE_URL + "/rest/v1/umfrage_antworten", { method:"POST", signal:ctl.signal,
+      headers:{ "apikey":SUPABASE_KEY, "Content-Type":"application/json", "Prefer":"return=minimal" },
+      body: JSON.stringify({ umfrage:UMFRAGE_ID, firma, payload }) });
+    clearTimeout(to); ok = r.ok;
+  }catch(err){ ok = false; }
+  if(ok){
+    signup.innerHTML = termin === LATER
+      ? `<div class="msg ok"><b>Danke! Wir informieren dich, sobald weitere Termine feststehen.</b><span class="muted">Du kannst dieses Fenster jetzt schliessen.</span></div>`
+      : `<div class="msg ok"><b>${esc(T("neu_danke","Danke für deine Anmeldung!"))}</b><span>Termin: ${esc(termin)}</span><span class="muted">Du kannst dieses Fenster jetzt schliessen.</span></div>`;
+    return;
+  }
+  // Rückfall: Anmeldung per E-Mail
+  const body = `Hallo Apriko-Team\n\nich melde mich für den Workshop «${T("ws_titel","Die Zukunft ist heute.")}» an.\n\nTermin: ${termin}\nFirma: ${firma}\nName: ${name}\nE-Mail: ${mail}\n\nLiebe Grüsse`;
+  const href = "mailto:" + EMPFAENGER + "?subject=" + encodeURIComponent("Anmeldung Workshop – " + firma) + "&body=" + encodeURIComponent(body);
+  btn.disabled = false; btn.textContent = T("neu_knopf","Anmelden");
+  box.innerHTML = `<div class="msg"><b>Die Anmeldung konnte nicht direkt übermittelt werden.</b><span>Bitte schick sie uns per E-Mail an <b style="user-select:all">${esc(EMPFAENGER)}</b>:</span><div><a class="btn primary" href="${esc(href)}" style="text-decoration:none">Per E-Mail anmelden</a></div></div>`;
+}
+renderForm();
+})();
+</script>
+</body>
+</html>
