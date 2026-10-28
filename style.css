@@ -260,3 +260,10 @@ html{overflow-x:hidden}               /* Sicherheitsnetz gegen 1-px-Überstände
 .gate-links{display:flex;flex-wrap:wrap;gap:8px}
 .checks label.locked{opacity:.5;cursor:not-allowed}
 .lock{font-size:12px}
+
+/* ===== Workshop-Hinweis bei der API-Frage ===== */
+.ws-teaser{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:12px;border:2px solid transparent;background:linear-gradient(var(--accent-soft),var(--accent-soft)) padding-box,var(--grad) border-box;animation:teaserIn .25s ease-out}
+.ws-teaser p{margin:0;font-weight:600}
+.ws-teaser .tag{align-self:flex-start;font:700 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--grad);color:var(--on-grad)}
+@keyframes teaserIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.ws-teaser{animation:none}}

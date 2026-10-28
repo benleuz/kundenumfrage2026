@@ -18,6 +18,8 @@ var TEXTE = {
  "kommentar_bereich": "Was möchtest du uns dazu noch sagen?",
  "api_frage": "Wusstest du, dass du über unsere offene API praktisch jedes System an Apriko anbinden kannst?",
  "api_kommentar": "Welche Systeme würdest du gerne anbinden? (z. B. Zeiterfassung, Buchhaltung, Jobportale)",
+ "api_hinweis": "Ui, dann musst du dich unbedingt für unseren Workshop «Die Zukunft ist heute.» anmelden! In einer Stunde zeigen wir dir, wie du mit unserer API und KI zum Beispiel ein eigenes Dashboard baust. Anmelden kannst du dich am Ende der Umfrage.",
+ "api_hinweis_nutzer": "Stark! Dann ist unser Workshop «Die Zukunft ist heute.» genau richtig für dich: Wir zeigen dir, was mit KI und unserer API noch alles drinliegt. Anmelden kannst du dich am Ende der Umfrage.",
  "bpo_kommentar": "Anmerkungen zu BPO",
  "roadmap_titel": "Deine Wunsch-Roadmap",
  "roadmap_intro": "Welche drei Themen sollen wir als Nächstes bauen? Zieh deine Top 3 nach rechts und sortiere sie: Platz 1 ist am wichtigsten. Fehlt dein Thema, füg es unten hinzu.",
