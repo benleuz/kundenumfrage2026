@@ -143,7 +143,7 @@ function render(){
     ${radios("services",T("lbl_leistungen"),SERVICES)}`;
   } else if(s.kind==="rating"){
     body = head(s.title,s.lead) + `<div>${ratingRows(s.items)}</div>`;
-    if(s.id==="funktion") body += radios("api",T("api_frage"),API_OPTIONS) + `<div id="apiHint" aria-live="polite">${apiHint()}</div>` + opt("api_txt",T("api_kommentar"))
+    if(s.id==="funktion") body += opt("f_zeit",T("f_zeit_frage")) + opt("f_extern",T("f_extern_frage")) + radios("api",T("api_frage"),API_OPTIONS) + `<div id="apiHint" aria-live="polite">${apiHint()}</div>` + opt("api_txt",T("api_kommentar"))
       + radios("insel",T("insel_frage"),INSEL_OPTIONS)
       + `<div id="inselTxt" ${A().insel && A().insel===INSEL_OPTIONS[0] ? "" : "hidden"}>${opt("insel_txt",T("insel_kommentar"))}</div>`
       + `<div id="inselHint" aria-live="polite">${inselHint()}</div>`;

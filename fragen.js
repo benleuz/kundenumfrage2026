@@ -16,6 +16,8 @@ var TEXTE = {
  "lbl_rolle": "Deine Funktion",
  "lbl_seit": "Kunde von Apriko seit",
  "lbl_leistungen": "Welche Leistungen nutzt ihr bei Apriko?",
+ "f_zeit_frage": "Welche Aufgabe kostet dich in Apriko am meisten Zeit?",
+ "f_extern_frage": "Welche Arbeiten erledigst du noch ausserhalb von Apriko (Excel, Papier, anderes Tool)?",
  "api_frage": "Wusstest du, dass du über unsere offene API praktisch jedes System an Apriko anbinden kannst?",
  "api_kommentar": "Welche Systeme würdest du gerne anbinden? (z. B. Zeiterfassung, Buchhaltung, Jobportale)",
  "api_hinweis": "Ui, dann musst du dich unbedingt für unseren Workshop «Die Zukunft ist heute.» anmelden! In einer Stunde zeigen wir dir, wie du mit unserer API und KI zum Beispiel ein eigenes Dashboard baust. Anmelden kannst du dich am Ende der Umfrage.",
@@ -81,27 +83,27 @@ var SECTIONS = [
    [
     "q_stab",
     "Stabilität und Verfügbarkeit",
-    "Systemausfälle, Wartungsfenster"
+    ""
    ],
    [
     "q_perf",
     "Geschwindigkeit",
-    "Ladezeiten, Lohnlauf, Auswertungen"
+    ""
    ],
    [
     "q_lohn",
     "Korrektheit der Lohnabrechnung/Rechnung",
-    "Sozialversicherungen, Quellensteuer, GAV, Faktura"
+    ""
    ],
    [
     "q_rel",
     "Qualität neuer Releases",
-    "Fehler nach Updates, Kommunikation zu Änderungen"
+    ""
    ],
    [
     "q_daten",
     "Datenqualität und Auswertungen",
-    "Reports, Statistiken, Exporte"
+    ""
    ]
   ]
  },
@@ -119,7 +121,7 @@ var SECTIONS = [
    [
     "f_bedien",
     "Bedienbarkeit",
-    "Übersichtlichkeit, Anzahl Klicks"
+    ""
    ],
    [
     "f_dispo",
@@ -144,12 +146,12 @@ var SECTIONS = [
    [
     "f_schnitt",
     "Schnittstellen",
-    "Buchhaltung, Banken, Sonstiges"
+    ""
    ],
    [
     "f_mobile",
     "Nutzung unterwegs",
-    "Smartphone, Tablet"
+    ""
    ]
   ]
  },
@@ -200,7 +202,7 @@ var SECTIONS = [
    [
     "b_termin",
     "Termintreue",
-    "Lohnläufe, Buchungen, Abschlüsse"
+    ""
    ],
    [
     "b_fehler",
@@ -215,7 +217,7 @@ var SECTIONS = [
    [
     "b_fach",
     "Fachkompetenz",
-    "Lohn, Sozialversicherungen, Buchhaltung"
+    ""
    ],
    [
     "b_komm",

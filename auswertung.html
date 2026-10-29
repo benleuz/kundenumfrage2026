@@ -112,6 +112,12 @@ function renderResults(){
       ${later.length?`<div><h3>Möchten über weitere Termine informiert werden (${later.length})</h3>${later.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')}</div>${esc(r.answers.ws_name||'')} · ${esc(r.answers.ws_mail||'')}</div>`).join("")}</div>`:''}
       ${reg.length?`<div class="nav" style="justify-content:flex-start"><button type="button" class="btn ghost" id="wsCopy">E-Mail-Adressen kopieren</button><span class="note" id="wsNote"></span></div>`:''}</div>`;
   }
+  // Zeitfresser und Arbeiten ausserhalb Apriko (Freitext)
+  const zt = R.filter(r=>r.answers.f_zeit), ex = R.filter(r=>r.answers.f_extern);
+  const cm = list=>list.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers[list===zt?'f_zeit':'f_extern'])}</div>`).join("");
+  if(typeof T==="function" && (T("f_zeit_frage")||T("f_extern_frage"))) html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Funktionalität</span><h2>Zeitfresser und Arbeiten ausserhalb von Apriko</h2></div>
+    <div><h3>${esc(T("f_zeit_frage"))} (${zt.length})</h3>${zt.length?cm(zt):'<p class="muted">Noch keine Antworten.</p>'}</div>
+    <div><h3>${esc(T("f_extern_frage"))} (${ex.length})</h3>${ex.length?cm(ex):'<p class="muted">Noch keine Antworten.</p>'}</div></div>`;
   // API-Nutzung
   const ap = {}; R.forEach(r=>{ const v = r.answers.api; if(v) ap[v]=(ap[v]||0)+1; });
   const apN = Object.values(ap).reduce((a,b)=>a+b,0);
@@ -189,7 +195,7 @@ function renderResults(){
 }
 function toCsv(){
   const keys = ["kind","firma","rolle","seit","ma","services"]; SECTIONS.filter(s=>s.items).forEach(s=>{ s.items.forEach(i=>keys.push(i[0])); keys.push("c_"+s.id); });
-  keys.push("api","api_txt","insel","insel_txt","trend_sw","trend_bpo","c_bpo","bpo_interest","c_roadmap","nps","g_fortschritt","g_fortschritt_txt","g_total","g_preis","g_best","g_improve","callback","kname","kmail","ws_termin","ws_name","ws_mail");
+  keys.push("f_zeit","f_extern","api","api_txt","insel","insel_txt","trend_sw","trend_bpo","c_bpo","bpo_interest","c_roadmap","nps","g_fortschritt","g_fortschritt_txt","g_total","g_preis","g_best","g_improve","callback","kname","kmail","ws_termin","ws_name","ws_mail");
   const q = v=>'"'+String(v==null?"":Array.isArray(v)?v.join(", "):v).replace(/"/g,'""')+'"';
   const head = keys.concat(["roadmap","eingereicht"]);
   const rows = latest.map(r=>keys.map(k=>q(k==="kind" ? (r.kind==="workshop" ? "Neukunde Workshop" : "Umfrage") : r.answers[k])).concat([q((r.roadmap||[]).map(x=>x.rank+". "+x.title).join(" | ")), q(r.submittedAt)]).join(";"));
