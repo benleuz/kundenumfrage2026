@@ -10,6 +10,9 @@
 <link rel="icon" type="image/png" href="icon.png">
 <link rel="stylesheet" href="style.css">
 <style>
+:root{ --d1:#C0392F; --d2:#E5897E; --d3:#F5D2CC; --d4:#D3E2F5; --d5:#7FA7DC; --d6:#2E62B0; --dn:#ECEFEA; --dt1:#fff; --dt6:#fff }
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){ --d1:#E46A5F; --d2:#9C4A43; --d3:#5A3D3A; --d4:#334257; --d5:#3F6699; --d6:#6E9FE6; --dn:#303330; --dt1:#1B1C1B; --dt6:#1B1C1B }}
+:root[data-theme="dark"]{ --d1:#E46A5F; --d2:#9C4A43; --d3:#5A3D3A; --d4:#334257; --d5:#3F6699; --d6:#6E9FE6; --dn:#303330; --dt1:#1B1C1B; --dt6:#1B1C1B }
 table.answers td{vertical-align:middle}
 table.answers td.act{white-space:nowrap;text-align:right}
 .btn.small{padding:5px 10px;font-size:13px}
@@ -17,14 +20,102 @@ table.answers td.act{white-space:nowrap;text-align:right}
 .hbar:has(.pct){grid-template-columns:minmax(0,1fr) 120px 40px 48px}
 .hbar .pct{color:var(--muted)}
 @media (max-width:480px){.hbar:has(.pct){grid-template-columns:minmax(0,1fr) 60px 34px 42px}}
+/* Navigation */
+.dash-nav{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow-x:auto;padding:10px 0;background:var(--bg);scrollbar-width:none}
+.dash-nav a{flex:0 0 auto;font:600 13px var(--f-body);padding:7px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);text-decoration:none}
+.dash-nav a:hover{border-color:var(--ink)}
+.dash-sec{display:flex;flex-direction:column;gap:16px;scroll-margin-top:60px}
+.dash-2{gap:16px;align-items:start}
+@media (max-width:900px){.dash-2{grid-template-columns:1fr}}
+/* Hero */
+.hero{display:grid;grid-template-columns:minmax(240px,1fr) 2fr;gap:16px}
+@media (max-width:900px){.hero{grid-template-columns:1fr}}
+.hero-main{background:var(--head-bg);color:var(--head-ink);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.hero-main::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--grad)}
+.hero-main .eyebrow{color:var(--head-muted)}
+.hero-num{font:700 64px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.hero-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.hero-kpis .kpi:last-child{grid-column:span 2}
+@media (max-width:620px){.hero-kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi b small{font-size:15px;color:var(--muted);font-weight:400}
+.npsbar{display:flex;gap:2px;height:12px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.08)}
+.npsbar i{display:block;height:100%}
+.n-det{background:var(--d1)} .n-pas{background:#9AA39A} .n-pro{background:var(--d6)}
+.hero-main .n-pro{background:#6E9FE6} .hero-main .n-det{background:#E46A5F}
+.npsleg{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--head-muted)}
+.npsleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+/* Bereiche */
+.areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.area{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.area-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.area-row b{font:700 30px var(--f-display);font-variant-numeric:tabular-nums}
+.meter6{height:6px;border-radius:3px;background:var(--chip);overflow:hidden}.meter6 i{display:block;height:100%;background:var(--grad);border-radius:3px}
+/* Bewertungs-Zellen (divergierend: rot 1–3, blau 4–6, Zahl immer sichtbar) */
+.sc{display:inline-grid;place-items:center;min-width:30px;height:26px;padding:0 4px;border-radius:6px;font:600 13px var(--f-mono);font-variant-numeric:tabular-nums;background:var(--dn);color:var(--muted)}
+.sc.s1{background:var(--d1);color:var(--dt1)}.sc.s2{background:var(--d2);color:var(--ink)}.sc.s3{background:var(--d3);color:var(--ink)}
+.sc.s4{background:var(--d4);color:var(--ink)}.sc.s5{background:var(--d5);color:var(--ink)}.sc.s6{background:var(--d6);color:var(--dt6)}
+.track i.b1,.track i.b2,.track i.b3{background:var(--d1)!important}.track i.b4,.track i.b5,.track i.b6{background:var(--d6)!important}
+.scale-leg{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:12px}.scale-leg .muted{margin-left:6px}
+/* Heatmap */
+table.heat{border-collapse:separate;border-spacing:2px;font-size:13px;width:auto}
+table.heat th,table.heat td{padding:0;border:0;text-align:center;vertical-align:bottom;background:none}
+table.heat td{vertical-align:middle}
+table.heat .hf{text-align:left;white-space:nowrap;padding-right:12px;position:sticky;left:0;background:var(--surface);z-index:1;vertical-align:middle;font:600 14px var(--f-body);text-transform:none;letter-spacing:0;color:var(--ink)}
+table.heat tr.avgrow .hf{font-weight:400;color:var(--muted)}
+table.heat .hf .muted{display:block;font-size:11px;font-weight:400}
+table.heat .hsec{font:600 11px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:4px;text-align:left}
+table.heat th.vh{height:180px;width:32px;text-transform:none;letter-spacing:0}
+table.heat th.vh span{writing-mode:vertical-rl;transform:rotate(180deg);display:inline-block;max-height:176px;font-family:var(--f-body);text-transform:none;letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:12px;color:var(--muted)}
+table.heat td.tot{padding-left:6px}
+table.heat tr.avgrow th,table.heat tr.avgrow td{padding-top:6px;border-top:2px solid var(--line)}
+table.heat tr:hover .hf .firm{text-decoration:underline}
+.npsv{display:inline-grid;place-items:center;min-width:30px;height:26px;border-radius:6px;font:600 13px var(--f-mono);background:var(--chip)}
+.npsv.n-pro{background:var(--d6);color:var(--dt6)}.npsv.n-det{background:var(--d1);color:var(--dt1)}.npsv.n-pas{background:#C9CEC8;color:#262626}
+button.firm{font:inherit;font-weight:700;background:none;border:0;padding:0;color:var(--ink);cursor:pointer;text-align:left}
+button.firm.link{font-weight:600;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+button.firm:hover{text-decoration-color:var(--ink)}
+.comment.crit{display:flex;flex-direction:column;gap:6px}
+.crit-line{display:flex;align-items:center;gap:10px}
+.who button.firm{font:inherit;text-transform:inherit;letter-spacing:inherit}
+.saldo{font:600 13px var(--f-mono);padding:3px 8px;border-radius:999px;background:var(--chip);margin-left:6px}
+.sub{margin-top:6px}
+/* Roadmap */
+.rmap{display:flex;flex-direction:column}
+.rm{border-top:1px solid var(--line)}
+.rm summary{display:grid;grid-template-columns:28px minmax(0,1fr) 140px 36px;gap:10px;align-items:center;padding:9px 0;cursor:pointer;list-style:none;font-size:14px}
+.rm summary::-webkit-details-marker{display:none}
+.rm summary .rk{font:600 12px var(--f-mono);color:var(--muted)}
+.rm summary .track{height:8px;background:var(--chip);border-radius:4px;overflow:hidden}.rm summary .track i{display:block;height:100%;background:var(--grad);border-radius:4px}
+.rm summary .v{font:500 13px var(--f-mono);text-align:right}
+.rm[open] summary .rt{font-weight:700}
+@media (max-width:520px){.rm summary{grid-template-columns:22px minmax(0,1fr) 60px 30px}}
+.rm-who{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 12px 38px}
+@media (max-width:520px){.rm-who{padding-left:0}}
+.chip{font:13px var(--f-body);padding:5px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);color:var(--ink)}
+.chip b{font-weight:700;margin-right:4px}
+button.chip{cursor:pointer}button.chip:hover{border-color:var(--ink)}
+/* Firmenprofil */
+dialog#firmDlg{border:0;border-radius:16px;padding:0;max-width:760px;width:calc(100% - 32px);max-height:88vh;background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog#firmDlg::backdrop{background:rgba(0,0,0,.45)}
+.pf{display:flex;flex-direction:column;gap:18px;padding:clamp(18px,4vw,28px);position:relative}
+.pf-close{position:absolute;top:14px;right:14px}
+.pf-body{display:flex;flex-direction:column;gap:18px}
+.pf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2px 18px}
+.pf-row{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:6px 0;font-size:14px}
+.pf-row span:last-child{text-align:right;font-weight:600}
+.pf-rates{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px 16px}
+.pf-rate{display:flex;align-items:center;gap:10px;font-size:14px}
+/* Tooltip */
+#tip{position:fixed;z-index:50;pointer-events:none;max-width:280px;background:var(--head-bg);color:var(--head-ink);font-size:12px;line-height:1.4;padding:6px 9px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+details.codes>summary{cursor:pointer;font-weight:700}
+.brandbar .inner,.wrap{max-width:1240px}
 </style>
 </head>
 <body>
   <header class="brandbar"><div class="inner">
     <img class="logo" src="logo.png" alt="Apriko" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="wordmark" hidden>Apriko</span>
-    <span class="eyebrow">Intern · Apriko</span>
-    <h1>Auswertung Kundenumfrage 2026</h1>
-    <p>Hier sammelst du die Antwort-Codes aus den Kunden-Mails. Alles läuft lokal in deinem Browser.</p>
+    <span class="eyebrow">Intern · Live-Dashboard</span>
+    <h1>Kundenumfrage 2026</h1>
+    <p>Alle Antworten live aus der Datenbank: Zufriedenheit pro Firma, Handlungsbedarf, Roadmap, Workshop und Leads.</p>
   </div></header>
 <div class="wrap">
   <div class="panel" id="dbPanel">
@@ -37,16 +128,20 @@ table.answers td.act{white-space:nowrap;text-align:right}
     </form>
     <div class="nav" id="dbBar" style="justify-content:flex-start" hidden><button type="button" class="btn primary" id="dbReload">Neu laden</button><button type="button" class="btn ghost" id="dbLogout">Abmelden</button><span class="note" id="dbInfo2"></span></div>
   </div>
-  <div class="panel">
-    <div class="panel-head"><h2>Antwort-Codes einfügen</h2>
+  <details class="panel codes">
+    <summary>Antwort-Codes einfügen (nur im Notfall)</summary>
+    <div class="panel-head">
       <p class="muted">Nur nötig, falls bei einem Kunden die direkte Übermittlung nicht geklappt hat. Kopier die Codes aus den E-Mails hierher. Ganze Mails gehen auch, die Codes werden automatisch erkannt. Doppelte Codes zählen nur einmal.</p></div>
     <div class="field"><label for="codes">Codes oder E-Mail-Texte</label><textarea id="codes" style="min-height:140px;font-family:var(--f-mono);font-size:13px" placeholder="APK1:…"></textarea></div>
     <div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="addCodes">Hinzufügen</button><button type="button" class="btn ghost" id="clearCodes">Alle entfernen</button><span class="note" id="fileInfo"></span></div>
     <div id="confirmClear" class="msg err" hidden><b>Alle gespeicherten Codes aus diesem Browser entfernen?</b><div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="clearYes">Ja, entfernen</button><button type="button" class="btn ghost" id="clearNo">Abbrechen</button></div></div>
     <p class="note">Die Codes bleiben nur in diesem Browser gespeichert, nichts wird hochgeladen. Für eine Sicherung: unten «CSV herunterladen» oder die Codes in einer Textdatei aufbewahren.</p>
-  </div>
-  <section id="results" class="wrap"></section>
+  </details>
+  <nav class="dash-nav" id="dashNav" hidden aria-label="Bereiche"><a href="#d-ueberblick">Überblick</a><a href="#d-heatmap">Heatmap</a><a href="#d-handlung">Handlungsbedarf</a><a href="#d-roadmap">Roadmap</a><a href="#d-leads">Workshop &amp; Leads</a><a href="#d-integration">Integration</a><a href="#d-stimmen">Stimmen</a><a href="#d-eintraege">Einträge</a></nav>
+  <section id="results" class="wrap" style="padding:0"></section>
 </div>
+<dialog id="firmDlg"><div class="pf"><button type="button" class="btn ghost small pf-close" onclick="this.closest('dialog').close()">Schliessen</button><div class="pf-body"></div></div></dialog>
+<div id="tip" role="tooltip" hidden></div>
 <script src="code.js"></script>
 <script src="fragen.js"></script>
 <script>
@@ -58,6 +153,14 @@ const results = document.getElementById("results");
 function avg(arr){ const v = arr.filter(x=>x!=null&&x!=="na"&&x!=="").map(Number); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; }
 function color(v,max){ const r=v/max; return r>=.75?"var(--good)":r>=.55?"var(--warn)":"var(--bad)"; }
 let latest = [];
+/* ---------- Dashboard ---------- */
+const fmtD = d=>{ try{ return new Date(d).toLocaleString("de-CH",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } };
+const num = v => (v==null||v===""||v==="na") ? null : Number(v);
+const f1 = v => v==null ? "–" : v.toFixed(1);
+const bucket = v => v==null ? 0 : Math.min(6, Math.max(1, Math.round(v)));
+const cell = (v, label) => `<span class="sc s${bucket(v)}"${label?` data-tip="${esc(label)}"`:""}>${v==null?"–":(Number.isInteger(v)?v:v.toFixed(1))}</span>`;
+const firmName = r => (r.answers.firma||"").trim() || "anonym";
+let VIEW = { ALL:[], R:[], items:[] };
 function renderResults(){
   /* Doppelt abgeschickte Antworten (gleiche Sendungs-ID oder identischer Inhalt) zählen nur einmal; die älteste bleibt */
   const byAge = latest.map((r,i)=>({r,i})).sort((a,b)=>String(a.r._created||a.r.submittedAt||"").localeCompare(String(b.r._created||b.r.submittedAt||"")));
@@ -66,125 +169,181 @@ function renderResults(){
   byAge.forEach(({r,i})=>{ const k = dupKey(r); if(seenK.has(k)) DUP.add(i); else seenK.add(k); });
   const ALL = latest.filter((r,i)=>!DUP.has(i));       // inkl. Neukunden-Workshop-Anmeldungen, ohne Doppelte
   const R = ALL.filter(r=>r.kind!=="workshop"), n = R.length;   // nur Umfrage-Antworten
-  if(!ALL.length){ results.innerHTML = `<div class="panel"><div class="panel-head"><span class="eyebrow">Auswertung</span><h2>Noch keine Antworten</h2><p class="muted">Füg oben die Antwort-Codes aus den Kunden-Mails ein. Danach erscheinen hier NPS, Bewertungen pro Bereich, die Roadmap-Rangliste und alle Kommentare.</p></div></div>`; return; }
-  const nps = R.map(r=>r.answers.nps).filter(x=>x!=null).map(Number);
-  const pro = nps.filter(x=>x>=9).length, det = nps.filter(x=>x<=6).length;
+  document.getElementById("dashNav").hidden = !ALL.length;
+  if(!ALL.length){ results.innerHTML = `<div class="panel"><div class="panel-head"><span class="eyebrow">Dashboard</span><h2>Noch keine Antworten</h2><p class="muted">Melde dich oben an. Danach erscheinen hier alle Kennzahlen, die Heatmap pro Firma, Handlungsbedarf, Roadmap und Stimmen.</p></div></div>`; return; }
+
+  /* Bewertungsfragen (ohne Gesamt) und Bereiche */
+  const rateSecs = SECTIONS.filter(s=>s.items && s.items.length && s.kind!=="overall");
+  const items = []; rateSecs.forEach(s=>s.items.forEach(([k,l])=>items.push({k,l,sec:s.id,secTitle:s.title})));
+  const itemStat = items.map(it=>{ const v = R.map(r=>num(r.answers[it.k])).filter(x=>x!=null); return Object.assign({}, it, {n:v.length, avg: v.length? v.reduce((a,b)=>a+b,0)/v.length : null, happy: v.length? Math.round(v.filter(x=>x>=4).length/v.length*100) : null}); });
+  const firmAvg = r => { const v = items.map(it=>num(r.answers[it.k])).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  VIEW = { ALL, R, items };
+
+  /* KPIs */
+  const nps = R.map(r=>num(r.answers.nps)).filter(x=>x!=null);
+  const pro = nps.filter(x=>x>=9).length, pas = nps.filter(x=>x>=7&&x<=8).length, det = nps.filter(x=>x<=6).length;
   const npsScore = nps.length? Math.round((pro-det)/nps.length*100) : null;
   const gt = avg(R.map(r=>r.answers.g_total));
-  const cb = R.filter(r=>r.answers.callback).length;
-  let html = `<div class="kpis">
-    <div class="kpi"><span>Antworten</span><b>${n}</b></div>
-    <div class="kpi"><span>NPS (−100 bis +100)</span><b>${npsScore==null?'–':(npsScore>0?'+':'')+npsScore}</b></div>
-    <div class="kpi"><span>Gesamtzufriedenheit Ø (1–6)</span><b>${gt==null?'–':gt.toFixed(1)}</b></div>
-    <div class="kpi"><span>Gesprächswunsch</span><b>${cb}</b></div></div>`;
-  SECTIONS.filter(s=>s.items).forEach(s=>{
-    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Bewertung 1–6 · Ø und Anteil zufrieden (4–6)</span><h2>${esc(s.title)}</h2></div><div>`;
-    s.items.forEach(([k,l])=>{ const vals = R.map(r=>r.answers[k]); const a = avg(vals); const valid = vals.filter(x=>x&&x!=="na"); const cnt = valid.length; const happy = cnt ? Math.round(valid.filter(x=>Number(x)>=4).length/cnt*100) : null;
-      html += `<div class="hbar"><span>${esc(l)} <span class="muted">(${cnt})</span></span><span class="track"><i style="width:${a?((a-1)/5*100).toFixed(0):0}%;background:${a?color(a,6):'transparent'}"></i></span><span class="v">${a==null?'–':a.toFixed(1)}</span><span class="v pct">${happy==null?'':happy+' %'}</span></div>`; });
-    const cs = R.filter(r=>r.answers["c_"+s.id]);
-    html += `</div>${cs.length?`<div><h3>Kommentare</h3>${cs.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers["c_"+s.id])}</div>`).join("")}</div>`:''}</div>`;
-  });
-  // Entwicklungsfortschritt 2026
-  const fs = {}; R.forEach(r=>{ const v = r.answers.g_fortschritt; if(v) fs[v]=(fs[v]||0)+1; });
-  const fsN = Object.values(fs).reduce((a,b)=>a+b,0);
-  const fsTxt = R.filter(r=>r.answers.g_fortschritt_txt);
-  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Wahrnehmung</span><h2>Entwicklungsfortschritte 2026 bemerkt?</h2><p class="note">${fsN} Antworten</p></div><div>${
-    FORTSCHRITT.map(o=>{ const c = fs[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${fsN?(c/fsN*100).toFixed(0):0}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`; }).join("")}</div>
-    ${fsTxt.length?`<div><h3>Kommentare</h3>${fsTxt.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.g_fortschritt||'')}</div>${esc(r.answers.g_fortschritt_txt)}</div>`).join("")}</div>`:''}</div>`;
-  // Tendenz 2026 (Software / BPO)
-  if(typeof TENDENZ!=="undefined" && TENDENZ.length){
-    const block = (key,label)=>{
-      const c = {}; R.forEach(r=>{ const v = r.answers[key]; if(v) c[v]=(c[v]||0)+1; });
-      const n = Object.values(c).reduce((a,b)=>a+b,0); if(!n) return `<div><h3>${label}</h3><p class="muted">Noch keine Antworten.</p></div>`;
-      const pos = (c[TENDENZ[0]]||0)+(c[TENDENZ[1]]||0), neg = (c[TENDENZ[3]]||0)+(c[TENDENZ[4]]||0), rated = n-(c[TENDENZ[5]]||0);
-      const saldo = rated ? Math.round((pos-neg)/rated*100) : 0;
-      const col = i => i<2 ? "var(--good)" : i===2 ? "var(--muted)" : i<5 ? "var(--bad)" : "var(--line)";
-      return `<div><h3>${label} <span class="muted" style="font-weight:400">· Saldo ${saldo>0?'+':''}${saldo} (besser minus schlechter, in %)</span></h3>${
-        TENDENZ.map((o,i)=>{ const k = c[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${(k/n*100).toFixed(0)}%;background:${col(i)}"></i></span><span class="v">${k}</span></div>`; }).join("")}</div>`;
-    };
-    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Entwicklung</span><h2>Tendenz 2026: besser oder schlechter?</h2></div>${block("trend_sw","Software")}${block("trend_bpo","BPO")}</div>`;
-  }
-  // Workshop-Anmeldungen
-  if(typeof WS_TERMINE!=="undefined" && WS_TERMINE.length){
-    const wsDates = WS_TERMINE.slice(0, Math.max(0, WS_TERMINE.length-2));
-    const reg = ALL.filter(r=>wsDates.includes(r.answers.ws_termin));
-    const later = ALL.filter(r=>r.answers.ws_termin && r.answers.ws_termin===WS_TERMINE[WS_TERMINE.length-2] && wsDates.length < WS_TERMINE.length-1);
-    const regs = d=>ALL.filter(r=>r.answers.ws_termin===d).length;
-    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Workshop</span><h2>Anmeldungen Workshop «${esc(typeof T==="function"?T("ws_titel","Die Zukunft ist heute."):"Die Zukunft ist heute.")}»</h2><p class="note">${reg.length} Anmeldungen (${reg.filter(r=>r.kind==="workshop").length} Neukunden) · online via Microsoft Teams</p></div>
-      <div class="kpis" style="grid-template-columns:repeat(${Math.max(1,wsDates.length)},1fr)">${wsDates.map(d=>`<div class="kpi"><span>${esc(d)}</span><b>${regs(d)}</b><span>Anmeldung(en)</span></div>`).join("")}</div>
+  const allV = items.flatMap(it=>R.map(r=>num(r.answers[it.k]))).filter(x=>x!=null);
+  const happyAll = allV.length? Math.round(allV.filter(x=>x>=4).length/allV.length*100) : null;
+  const wsDates = (typeof WS_TERMINE!=="undefined") ? WS_TERMINE.slice(0, Math.max(0, WS_TERMINE.length-2)) : [];
+  const reg = ALL.filter(r=>wsDates.includes(r.answers.ws_termin));
+  const leadFirms = new Set(R.filter(r=>(API_LEAD && r.answers.api===API_LEAD) || r.answers.callback).map(firmName));
+  const last = ALL.map(r=>r._created||r.submittedAt).filter(Boolean).sort().pop();
+  const seg = (c,cls,label)=> c ? `<i class="${cls}" style="flex:${c}" data-tip="${label}: ${c}"></i>` : "";
+  let html = `<section id="d-ueberblick" class="dash-sec">
+  <div class="hero">
+    <div class="hero-main"><span class="eyebrow">Net Promoter Score</span><b class="hero-num">${npsScore==null?"–":(npsScore>0?"+":"")+npsScore}</b>
+      <div class="npsbar" aria-label="Promotoren ${pro}, Passive ${pas}, Kritiker ${det}">${seg(det,"n-det","Kritiker (0–6)")}${seg(pas,"n-pas","Passive (7–8)")}${seg(pro,"n-pro","Promotoren (9–10)")}</div>
+      <div class="npsleg"><span><i class="n-det"></i>Kritiker ${det}</span><span><i class="n-pas"></i>Passive ${pas}</span><span><i class="n-pro"></i>Promotoren ${pro}</span></div></div>
+    <div class="hero-kpis">
+      <div class="kpi"><span>Antworten</span><b>${n}</b><span>${new Set(R.map(firmName)).size} Firmen${last?` · zuletzt ${esc(fmtD(last))}`:""}</span></div>
+      <div class="kpi"><span>Gesamtzufriedenheit</span><b>${f1(gt)}<small> / 6</small></b><span>Durchschnitt</span></div>
+      <div class="kpi"><span>Zufrieden (4–6)</span><b>${happyAll==null?"–":happyAll+" %"}</b><span>über alle Bewertungen</span></div>
+      <div class="kpi"><span>Workshop</span><b>${reg.length}</b><span>${wsDates.map(d=>ALL.filter(r=>r.answers.ws_termin===d).length+" am "+esc(d.split(",")[1]||d).trim().replace(/ 2026/,"")).join(" · ")}</span></div>
+      <div class="kpi"><span>Leads</span><b>${leadFirms.size}</b><span>API-Interesse oder Gesprächswunsch</span></div>
+    </div>
+  </div>
+  <div class="areas">${rateSecs.map(s=>{
+      const st = itemStat.filter(x=>x.sec===s.id && x.avg!=null);
+      const v = R.flatMap(r=>s.items.map(([k])=>num(r.answers[k]))).filter(x=>x!=null);
+      const a = v.length? v.reduce((p,q)=>p+q,0)/v.length : null, hp = v.length? Math.round(v.filter(x=>x>=4).length/v.length*100) : null;
+      const low = st.slice().sort((p,q)=>p.avg-q.avg)[0];
+      const rn = new Set(R.filter(r=>s.items.some(([k])=>num(r.answers[k])!=null)).map((r,i)=>i)).size;
+      return `<div class="area"><span class="eyebrow">${esc(s.title)}</span><div class="area-row"><b>${f1(a)}</b><span class="muted">Ø von 6 · ${hp==null?"–":hp+" %"} zufrieden</span></div>
+        <div class="meter6"><i style="width:${a?((a-1)/5*100).toFixed(0):0}%"></i></div>
+        <span class="note">${rn} Antworten${low?` · schwächster Punkt: <b>${esc(low.l)}</b> (${f1(low.avg)})`:""}</span></div>`; }).join("")}</div>
+  </section>`;
+
+  /* Heatmap Firmen × Fragen */
+  const rows = R.map(r=>({r, a:firmAvg(r)})).sort((p,q)=>(q.a??-1)-(p.a??-1));
+  html += `<section id="d-heatmap" class="dash-sec"><div class="panel"><div class="panel-head"><span class="eyebrow">Heatmap · Bewertung 1–6 pro Firma</span><h2>Wer ist wo zufrieden?</h2>
+    <p class="note">Rot = unzufrieden (1–3), Blau = zufrieden (4–6), «–» = nicht bewertet. Sortiert nach Ø der Firma. Firma anklicken für das ganze Profil.</p>
+    <div class="scale-leg">${[1,2,3,4,5,6].map(v=>`<span class="sc s${v}">${v}</span>`).join("")}<span class="muted">sehr schlecht → sehr gut</span></div></div>
+    <div class="tablewrap"><table class="heat"><thead><tr><th class="hf">Firma</th>${rateSecs.map(s=>`<th colspan="${s.items.length}" class="hsec">${esc(s.title)}</th>`).join("")}<th class="hsec" colspan="3">Total</th></tr>
+    <tr><th class="hf"></th>${items.map(it=>`<th class="vh"><span>${esc(it.l)}</span></th>`).join("")}<th class="vh"><span>Ø Firma</span></th><th class="vh"><span>Gesamtzufriedenheit</span></th><th class="vh"><span>NPS (0–10)</span></th></tr></thead>
+    <tbody>${rows.map(({r,a},ri)=>`<tr><th class="hf"><button type="button" class="firm" data-firm="${R.indexOf(r)}">${esc(firmName(r))}</button><span class="muted">${esc(r.answers.rolle||"")}</span></th>${
+      items.map(it=>`<td>${cell(num(r.answers[it.k]), firmName(r)+" · "+it.l+": "+(r.answers[it.k]||"nicht bewertet"))}</td>`).join("")}
+      <td class="tot">${cell(a, firmName(r)+" · Ø über alle Fragen: "+f1(a))}</td><td class="tot">${cell(num(r.answers.g_total), firmName(r)+" · Gesamtzufriedenheit")}</td><td class="tot"><span class="npsv ${num(r.answers.nps)==null?"":num(r.answers.nps)>=9?"n-pro":num(r.answers.nps)>=7?"n-pas":"n-det"}">${r.answers.nps??"–"}</span></td></tr>`).join("")}
+    <tr class="avgrow"><th class="hf">Ø alle Firmen</th>${itemStat.map(it=>`<td>${cell(it.avg, it.l+": Ø "+f1(it.avg)+" ("+it.n+" Antworten)")}</td>`).join("")}<td class="tot">${cell(allV.length?allV.reduce((p,q)=>p+q,0)/allV.length:null)}</td><td class="tot">${cell(gt)}</td><td class="tot"><span class="npsv">${npsScore==null?"–":(npsScore>0?"+":"")+npsScore}</span></td></tr></tbody></table></div></div></section>`;
+
+  /* Handlungsbedarf & Stärken */
+  const ranked = itemStat.filter(x=>x.avg!=null).sort((p,q)=>p.avg-q.avg);
+  const crit = []; R.forEach(r=>items.forEach(it=>{ const v = num(r.answers[it.k]); if(v!=null && v<=2) crit.push({r,it,v}); }));
+  crit.sort((p,q)=>p.v-q.v);
+  const critics = R.filter(r=>num(r.answers.nps)!=null && num(r.answers.nps)<=6);
+  const barRow = it => `<div class="hbar sbar" data-tip="${esc(it.secTitle+" · "+it.l+": Ø "+f1(it.avg)+", "+it.happy+" % zufrieden, "+it.n+" Antworten")}"><span>${esc(it.l)} <span class="muted">· ${esc(it.secTitle)}</span></span><span class="track"><i class="b${bucket(it.avg)}" style="width:${((it.avg-1)/5*100).toFixed(0)}%"></i></span><span class="v">${f1(it.avg)}</span></div>`;
+  html += `<section id="d-handlung" class="dash-sec"><div class="grid2 dash-2">
+    <div class="panel"><div class="panel-head"><span class="eyebrow">Handlungsbedarf</span><h2>Die 5 schwächsten Punkte</h2></div><div>${ranked.slice(0,5).map(barRow).join("")||'<p class="muted">Noch keine Bewertungen.</p>'}</div>
+      ${crit.length?`<div><h3>Einzelne kritische Bewertungen (1–2)</h3>${crit.map(c=>`<div class="comment crit"><div class="who"><button type="button" class="firm link" data-firm="${R.indexOf(c.r)}">${esc(firmName(c.r))}</button> · ${esc(c.it.secTitle)}</div><div class="crit-line">${cell(c.v)}<span>${esc(c.it.l)}</span></div></div>`).join("")}</div>`:'<p class="note">Keine Bewertung 1 oder 2 – gut so.</p>'}
+      ${critics.length?`<div><h3>Kritiker (NPS 0–6)</h3>${critics.map(r=>`<div class="comment crit"><div class="who"><button type="button" class="firm link" data-firm="${R.indexOf(r)}">${esc(firmName(r))}</button> · NPS ${esc(r.answers.nps)}</div>${esc(r.answers.g_improve||"(kein Verbesserungsvorschlag)")}</div>`).join("")}</div>`:""}</div>
+    <div class="panel"><div class="panel-head"><span class="eyebrow">Stärken</span><h2>Die 5 stärksten Punkte</h2></div><div>${ranked.slice().reverse().slice(0,5).map(barRow).join("")||'<p class="muted">Noch keine Bewertungen.</p>'}</div>
+      ${R.some(r=>r.answers.g_best)?`<div><h3>Was Kunden schätzen</h3>${R.filter(r=>r.answers.g_best).map(r=>`<div class="comment"><div class="who"><button type="button" class="firm link" data-firm="${R.indexOf(r)}">${esc(firmName(r))}</button></div>${esc(r.answers.g_best)}</div>`).join("")}</div>`:""}</div>
+  </div>`;
+  /* Alle Fragen nach Bereich */
+  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Alle Bewertungen · Ø und Anteil zufrieden (4–6)</span><h2>Nach Bereich</h2></div>${rateSecs.map(s=>`<div><h3>${esc(s.title)}</h3>${
+      itemStat.filter(x=>x.sec===s.id).map(it=>`<div class="hbar sbar" data-tip="${esc(it.l+": "+(it.avg==null?"keine Antworten":"Ø "+f1(it.avg)+", "+it.happy+" % zufrieden, "+it.n+" Antworten"))}"><span>${esc(it.l)} <span class="muted">(${it.n})</span></span><span class="track"><i class="b${bucket(it.avg)}" style="width:${it.avg?((it.avg-1)/5*100).toFixed(0):0}%"></i></span><span class="v">${f1(it.avg)}</span><span class="v pct">${it.happy==null?"":it.happy+" %"}</span></div>`).join("")}${
+      (()=>{ const cs = R.filter(r=>r.answers["c_"+s.id]); return cs.length?`<div class="sub">${cs.map(r=>`<div class="comment"><div class="who">${esc(firmName(r))}</div>${esc(r.answers["c_"+s.id])}</div>`).join("")}</div>`:""; })()}</div>`).join("")}</div></section>`;
+
+  /* Roadmap mit Drilldown */
+  const score = {}, votes = {}, who = {}, own = [];
+  R.forEach(r=>(r.roadmap||[]).forEach(x=>{ if(x.own){ own.push({t:x.title,r,rank:x.rank}); return; }
+    score[x.title]=(score[x.title]||0)+Math.max(1,4-x.rank); votes[x.title]=(votes[x.title]||0)+1; (who[x.title]=who[x.title]||[]).push({r,rank:x.rank}); }));
+  const rk = Object.entries(score).sort((a,b)=>b[1]-a[1]||votes[b[0]]-votes[a[0]]); const mx = rk.length? rk[0][1] : 1;
+  const untouched = TOPICS.map(t=>t[1]).filter(t=>!score[t]);
+  html += `<section id="d-roadmap" class="dash-sec"><div class="panel"><div class="panel-head"><span class="eyebrow">Roadmap · Top 3 je Kunde</span><h2>Was wollen die Kunden als Nächstes?</h2><p class="note">Punkte: Platz 1 = 3, Platz 2 = 2, Platz 3 = 1. Thema anklicken: wer hat es auf welchem Platz gewählt.</p></div>
+    <div class="rmap">${rk.map(([t,sc],i)=>`<details class="rm"><summary><span class="rk">${i+1}</span><span class="rt">${esc(t)} <span class="muted">· ${votes[t]} ${votes[t]===1?"Nennung":"Nennungen"}</span></span><span class="track"><i style="width:${(sc/mx*100).toFixed(0)}%"></i></span><span class="v">${sc}</span></summary>
+      <div class="rm-who">${who[t].sort((a,b)=>a.rank-b.rank).map(w=>`<button type="button" class="chip firm" data-firm="${R.indexOf(w.r)}"><b>Platz ${w.rank}</b> ${esc(firmName(w.r))}</button>`).join("")}</div></details>`).join("")||'<p class="muted">Noch keine Priorisierungen.</p>'}</div>
+    ${untouched.length&&rk.length?`<p class="note">Von niemandem gewählt: ${untouched.map(esc).join(" · ")}</p>`:""}
+    ${own.length?`<div><h3>Eigene Themen der Kunden</h3>${own.map(o=>`<div class="comment"><div class="who"><button type="button" class="firm link" data-firm="${R.indexOf(o.r)}">${esc(firmName(o.r))}</button> · Platz ${o.rank}</div>${esc(o.t)}</div>`).join("")}</div>`:""}
+    ${R.some(r=>r.answers.c_roadmap)?`<div><h3>Beschreibungen zu Themen</h3>${R.filter(r=>r.answers.c_roadmap).map(r=>`<div class="comment"><div class="who">${esc(firmName(r))}</div>${esc(r.answers.c_roadmap)}</div>`).join("")}</div>`:""}</div>`;
+  /* Fortschritt + Tendenz */
+  const dist = (key, opts, colorFn) => { const c = {}; R.forEach(r=>{ const v = r.answers[key]; if(v) c[v]=(c[v]||0)+1; }); const t = Object.values(c).reduce((a,b)=>a+b,0);
+    return { t, c, html: opts.map((o,i)=>{ const k = c[o]||0; return `<div class="hbar" data-tip="${esc(o)}: ${k} von ${t}"><span>${esc(o)}</span><span class="track"><i style="width:${t?(k/t*100).toFixed(0):0}%;background:${colorFn(i)}"></i></span><span class="v">${k}</span></div>`; }).join("") }; };
+  const tcol = i => i<2 ? "var(--d6)" : i===2 ? "var(--muted)" : i<5 ? "var(--d1)" : "var(--line)";
+  const saldo = d => { const pos=(d.c[TENDENZ[0]]||0)+(d.c[TENDENZ[1]]||0), neg=(d.c[TENDENZ[3]]||0)+(d.c[TENDENZ[4]]||0), rated=d.t-(d.c[TENDENZ[5]]||0); return rated? Math.round((pos-neg)/rated*100) : null; };
+  const tsw = dist("trend_sw", TENDENZ, tcol), tbpo = dist("trend_bpo", TENDENZ, tcol), fsd = dist("g_fortschritt", FORTSCHRITT, i=> i<2 ? "var(--d6)" : i===2 ? "var(--muted)" : i===3 ? "var(--d1)" : "var(--line)");
+  const sB = v => v==null ? "–" : (v>0?"+":"")+v;
+  html += `<div class="grid2 dash-2">
+    <div class="panel"><div class="panel-head"><span class="eyebrow">Tendenz 2026</span><h2>Besser oder schlechter geworden?</h2><p class="note">Saldo = Anteil besser minus Anteil schlechter (ohne «kann ich nicht beurteilen»).</p></div>
+      <div><h3>Software <span class="saldo">${sB(saldo(tsw))}</span></h3>${tsw.t?tsw.html:'<p class="muted">Noch keine Antworten.</p>'}</div>
+      <div><h3>BPO <span class="saldo">${sB(saldo(tbpo))}</span></h3>${tbpo.t?tbpo.html:'<p class="muted">Noch keine Antworten.</p>'}</div></div>
+    <div class="panel"><div class="panel-head"><span class="eyebrow">Wahrnehmung</span><h2>Entwicklungsfortschritte 2026 bemerkt?</h2><p class="note">${fsd.t} Antworten</p></div><div>${fsd.html}</div>
+      ${R.some(r=>r.answers.g_fortschritt_txt)?`<div><h3>Kommentare</h3>${R.filter(r=>r.answers.g_fortschritt_txt).map(r=>`<div class="comment"><div class="who">${esc(firmName(r))} · ${esc(r.answers.g_fortschritt||"")}</div>${esc(r.answers.g_fortschritt_txt)}</div>`).join("")}</div>`:""}</div>
+  </div></section>`;
+
+  /* Workshop & Leads */
+  const later = (typeof WS_TERMINE!=="undefined" && WS_TERMINE.length>=2) ? ALL.filter(r=>r.answers.ws_termin===WS_TERMINE[WS_TERMINE.length-2]) : [];
+  const apiLeads = R.filter(r=>API_LEAD && r.answers.api===API_LEAD), callbacks = R.filter(r=>r.answers.callback);
+  html += `<section id="d-leads" class="dash-sec"><div class="panel"><div class="panel-head"><span class="eyebrow">Workshop «${esc(T("ws_titel","Die Zukunft ist heute."))}»</span><h2>Anmeldungen</h2><p class="note">${reg.length} Anmeldungen (${reg.filter(r=>r.kind==="workshop").length} Neukunden) · online via Microsoft Teams</p></div>
+      <div class="kpis" style="grid-template-columns:repeat(${Math.max(1,wsDates.length)},1fr)">${wsDates.map(d=>`<div class="kpi"><span>${esc(d)}</span><b>${ALL.filter(r=>r.answers.ws_termin===d).length}</b><span>Anmeldung(en)</span></div>`).join("")}</div>
       ${reg.length?`<div class="tablewrap"><table><thead><tr><th>Termin</th><th>Name</th><th>E-Mail</th><th>Firma</th><th>Herkunft</th></tr></thead><tbody>${
-        reg.map(r=>`<tr><td>${esc(r.answers.ws_termin)}</td><td>${esc(r.answers.ws_name||'')}</td><td style="user-select:all">${esc(r.answers.ws_mail||'')}</td><td>${esc(r.answers.firma||'anonym')}</td><td>${r.kind==="workshop"?'<span class="ws-date">Neukunde</span>':'Umfrage'}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Noch keine Anmeldungen.</p>'}
-      ${later.length?`<div><h3>Möchten über weitere Termine informiert werden (${later.length})</h3>${later.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')}</div>${esc(r.answers.ws_name||'')} · ${esc(r.answers.ws_mail||'')}</div>`).join("")}</div>`:''}
-      ${reg.length?`<div class="nav" style="justify-content:flex-start"><button type="button" class="btn ghost" id="wsCopy">E-Mail-Adressen kopieren</button><span class="note" id="wsNote"></span></div>`:''}</div>`;
-  }
-  // Zeitfresser und Arbeiten ausserhalb Apriko (Freitext)
-  const zt = R.filter(r=>r.answers.f_zeit), ex = R.filter(r=>r.answers.f_extern);
-  const cm = list=>list.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers[list===zt?'f_zeit':'f_extern'])}</div>`).join("");
-  if(typeof T==="function" && (T("f_zeit_frage")||T("f_extern_frage"))) html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Funktionalität</span><h2>Zeitfresser und Arbeiten ausserhalb von Apriko</h2></div>
-    <div><h3>${esc(T("f_zeit_frage"))} (${zt.length})</h3>${zt.length?cm(zt):'<p class="muted">Noch keine Antworten.</p>'}</div>
-    <div><h3>${esc(T("f_extern_frage"))} (${ex.length})</h3>${ex.length?cm(ex):'<p class="muted">Noch keine Antworten.</p>'}</div></div>`;
-  // API-Nutzung
-  const ap = {}; R.forEach(r=>{ const v = r.answers.api; if(v) ap[v]=(ap[v]||0)+1; });
-  const apN = Object.values(ap).reduce((a,b)=>a+b,0);
-  const apTxt = R.filter(r=>r.answers.api_txt);
-  const leads = R.filter(r=>API_LEAD && r.answers.api===API_LEAD);
-  if(API_OPTIONS.length) html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Integrationen</span><h2>API: bekannt und genutzt?</h2><p class="note">${apN} Antworten</p></div><div>${
-    API_OPTIONS.map(o=>{ const c = ap[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${apN?(c/apN*100).toFixed(0):0}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`; }).join("")}</div>
-    ${leads.length?`<div><h3>Möchten kontaktiert werden (${leads.length})</h3>${leads.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers.api_txt||'(keine Systeme genannt)')}${r.answers.kname||r.answers.kmail?` · Kontakt: ${esc(r.answers.kname||'')} ${esc(r.answers.kmail||'')}`:''}</div>`).join("")}</div>`:''}
-    ${apTxt.length?`<div><h3>Gewünschte Anbindungen</h3>${apTxt.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.api||'')}</div>${esc(r.answers.api_txt)}</div>`).join("")}</div>`:''}</div>`;
-  // Eigene Lösungen (Insellösungen)
-  if(typeof INSEL_OPTIONS!=="undefined" && INSEL_OPTIONS.length){
-    const il = {}; R.forEach(r=>{ const v = r.answers.insel; if(v) il[v]=(il[v]||0)+1; });
-    const ilN = Object.values(il).reduce((a,b)=>a+b,0);
-    const ilTxt = R.filter(r=>r.answers.insel_txt);
-    html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Integrationspotenzial</span><h2>Eigene Apps, Formulare, Excel-Listen</h2><p class="note">${ilN} Antworten · noch nicht mit Apriko verbunden</p></div><div>${
-      INSEL_OPTIONS.map(o=>{ const c = il[o]||0; return `<div class="hbar"><span>${esc(o)}</span><span class="track"><i style="width:${ilN?(c/ilN*100).toFixed(0):0}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`; }).join("")}</div>
-      ${ilTxt.length?`<div><h3>Genannte Lösungen</h3>${ilTxt.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}${r.answers.ws_termin&&WS_TERMINE.slice(0,Math.max(0,WS_TERMINE.length-2)).includes(r.answers.ws_termin)?' · Workshop: '+esc(r.answers.ws_termin):''}</div>${esc(r.answers.insel_txt)}</div>`).join("")}</div>`:''}</div>`;
-  }
-  // Roadmap: Platz 1 = 3, Platz 2 = 2, Platz 3 = 1 Punkt
-  const score = {}, votes = {}, own = [];
-  R.forEach(r=>(r.roadmap||[]).forEach(x=>{ if(x.own){ own.push({t:x.title,f:r.answers.firma,rank:x.rank}); return; }
-    score[x.title]=(score[x.title]||0)+Math.max(1,4-x.rank); votes[x.title]=(votes[x.title]||0)+1; }));
-  const ranked = Object.entries(score).sort((a,b)=>b[1]-a[1]); const mx = ranked.length? ranked[0][1] : 1;
-  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Roadmap</span><h2>Gewünschte Themen</h2><p class="note">Punkte: Platz 1 = 3, Platz 2 = 2, Platz 3 = 1. In Klammern: Anzahl Nennungen.</p></div><div>${
-    ranked.map(([t,s])=>`<div class="hbar"><span>${esc(t)} <span class="muted">(${votes[t]})</span></span><span class="track"><i style="width:${(s/mx*100).toFixed(0)}%;background:var(--accent)"></i></span><span class="v">${s}</span></div>`).join("")||'<p class="muted">Noch keine Priorisierungen.</p>'}</div>
-    ${own.length?`<div><h3>Eigene Themen der Kunden</h3>${own.map(o=>`<div class="comment"><div class="who">${esc(o.f||'anonym')} · Platz ${o.rank}</div>${esc(o.t)}</div>`).join("")}</div>`:''}</div>`;
-  const bi = {}; R.forEach(r=>(r.answers.bpo_interest||[]).forEach(x=>bi[x]=(bi[x]||0)+1));
-  const bie = Object.entries(bi).sort((a,b)=>b[1]-a[1]);
-  if(BPO_OPTIONS.length) html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Potenzial</span><h2>Interesse an BPO-Leistungen</h2></div><div>${bie.map(([t,c])=>`<div class="hbar"><span>${esc(t)}</span><span class="track"><i style="width:${(c/n*100).toFixed(0)}%;background:var(--accent)"></i></span><span class="v">${c}</span></div>`).join("")||'<p class="muted">Keine Angaben.</p>'}</div></div>`;
-  const txt = (k,t)=>{ const cs = R.filter(r=>r.answers[k]); return cs.length?`<div><h3>${t}</h3>${cs.map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')} · ${esc(r.answers.rolle||'')}</div>${esc(r.answers[k])}</div>`).join("")}</div>`:''; };
-  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Freitext</span><h2>Stimmen</h2></div>${txt("g_best","Was Kunden schätzen")}${txt("g_improve","Was wir verbessern sollen")}${
-    cb?`<div><h3>Gesprächswünsche</h3>${R.filter(r=>r.answers.callback).map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')}</div>${esc(r.answers.kname||'')} · ${esc(r.answers.kmail||'')}</div>`).join("")}</div>`:''}</div>`;
-  // Einzelne Antworten mit Löschen
-  const fmt = d=>{ try{ return new Date(d).toLocaleString("de-CH",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } };
+        reg.map(r=>`<tr><td>${esc(r.answers.ws_termin)}</td><td>${esc(r.answers.ws_name||"")}</td><td style="user-select:all">${esc(r.answers.ws_mail||"")}</td><td>${r.kind==="workshop"?esc(firmName(r)):`<button type="button" class="firm link" data-firm="${R.indexOf(r)}">${esc(firmName(r))}</button>`}</td><td>${r.kind==="workshop"?'<span class="ws-date">Neukunde</span>':"Umfrage"}</td></tr>`).join("")}</tbody></table></div>
+        <div class="nav" style="justify-content:flex-start"><button type="button" class="btn ghost" id="wsCopy">E-Mail-Adressen kopieren</button><span class="note" id="wsNote"></span></div>`:'<p class="muted">Noch keine Anmeldungen.</p>'}
+      ${later.length?`<div><h3>Möchten über weitere Termine informiert werden (${later.length})</h3>${later.map(r=>`<div class="comment"><div class="who">${esc(firmName(r))}</div>${esc(r.answers.ws_name||"")} · ${esc(r.answers.ws_mail||"")}</div>`).join("")}</div>`:""}</div>
+    <div class="panel"><div class="panel-head"><span class="eyebrow">Leads</span><h2>Wer will mehr?</h2><p class="note">Kunden, die zur API kontaktiert werden möchten oder ein Gespräch wünschen.</p></div>
+      ${apiLeads.length||callbacks.length?`<div class="tablewrap"><table><thead><tr><th>Firma</th><th>Anlass</th><th>Kontakt</th><th>Details</th></tr></thead><tbody>${
+        [...new Set(apiLeads.concat(callbacks))].map(r=>`<tr><td><button type="button" class="firm link" data-firm="${R.indexOf(r)}">${esc(firmName(r))}</button></td><td>${[apiLeads.includes(r)?"API":"" , callbacks.includes(r)?"Gesprächswunsch":""].filter(Boolean).join(" + ")}</td><td>${esc([r.answers.kname,r.answers.kmail].filter(Boolean).join(" · ")||[r.answers.ws_name,r.answers.ws_mail].filter(Boolean).join(" · ")||"–")}</td><td>${esc(r.answers.api_txt||"")}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Noch keine Leads.</p>'}</div></section>`;
+
+  /* Integration & Arbeitsweise */
+  const apd = dist("api", API_OPTIONS, ()=>"var(--accent)");
+  const ild = (typeof INSEL_OPTIONS!=="undefined" && INSEL_OPTIONS.length) ? dist("insel", INSEL_OPTIONS, ()=>"var(--accent)") : null;
+  const tx = (key, title, extra) => { const cs = R.filter(r=>r.answers[key]); return `<div><h3>${esc(title)} (${cs.length})</h3>${cs.length?cs.map(r=>`<div class="comment"><div class="who"><button type="button" class="firm link" data-firm="${R.indexOf(r)}">${esc(firmName(r))}</button>${extra?` · ${esc(extra(r))}`:""}</div>${esc(r.answers[key])}</div>`).join(""):'<p class="muted">Noch keine Antworten.</p>'}</div>`; };
+  html += `<section id="d-integration" class="dash-sec"><div class="grid2 dash-2">
+    <div class="panel"><div class="panel-head"><span class="eyebrow">Integrationen</span><h2>API: bekannt und genutzt?</h2><p class="note">${apd.t} Antworten</p></div><div>${apd.html}</div>${tx("api_txt","Gewünschte Anbindungen", r=>r.answers.api||"")}</div>
+    <div class="panel"><div class="panel-head"><span class="eyebrow">Integrationspotenzial</span><h2>Eigene Apps, Formulare, Excel-Listen</h2><p class="note">${ild?ild.t:0} Antworten · noch nicht mit Apriko verbunden</p></div>${ild?`<div>${ild.html}</div>`:""}${tx("insel_txt","Genannte Lösungen")}</div>
+  </div>
+  <div class="panel"><div class="panel-head"><span class="eyebrow">Arbeitsalltag</span><h2>Zeitfresser und Arbeiten ausserhalb von Apriko</h2></div><div class="grid2">${tx("f_zeit",T("f_zeit_frage","Grösster Zeitfresser"))}${tx("f_extern",T("f_extern_frage","Arbeiten ausserhalb von Apriko"))}</div></div></section>`;
+
+  /* Stimmen */
+  html += `<section id="d-stimmen" class="dash-sec"><div class="panel"><div class="panel-head"><span class="eyebrow">Freitext</span><h2>Stimmen</h2></div><div class="grid2">${tx("g_improve","Was wir verbessern sollen")}${tx("g_best","Was Kunden schätzen")}</div>${tx("c_bpo","Anmerkungen zu BPO")}</div></section>`;
+
+  /* Einträge + Rohdaten */
   const sorted = latest.map((r,i)=>({r,i})).sort((a,b)=>String(b.r._created||b.r.submittedAt||"").localeCompare(String(a.r._created||a.r.submittedAt||"")));
-  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Einzelne Antworten</span><h2>Alle Einträge (${latest.length})</h2>${DUP.size?`<p class="note"><b>${DUP.size} doppelt abgeschickt</b> – zählt nur einmal; du kannst das Doppel löschen.</p>`:""}
+  html += `<section id="d-eintraege" class="dash-sec"><div class="panel"><div class="panel-head"><span class="eyebrow">Einzelne Antworten</span><h2>Alle Einträge (${latest.length})</h2>${DUP.size?`<p class="note"><b>${DUP.size} doppelt abgeschickt</b> – zählt nur einmal; du kannst das Doppel löschen.</p>`:""}
     <p class="note">Tests oder Doppelte hier löschen, damit sie nicht in die Auswertung einfliessen. Gelöschte Datenbank-Antworten sind endgültig weg.</p></div>
     <div class="tablewrap"><table class="answers"><thead><tr><th>Eingegangen</th><th>Firma</th><th>Funktion</th><th>NPS</th><th>Quelle</th><th></th></tr></thead><tbody>${
-    sorted.map(({r,i})=>`<tr data-i="${i}"><td>${esc(fmt(r._created||r.submittedAt))}</td><td>${esc(r.answers.firma||"anonym")}</td><td>${esc(r.answers.rolle||"")}</td><td>${esc(r.answers.nps??"")}</td><td>${r.kind==="workshop"?"Neukunden-Einladung":(r._src==="db"?"Umfrage":"Umfrage (Code)")}${DUP.has(i)?' <span class="ws-date">Doppelt</span>':""}</td>
-      <td class="act"><button type="button" class="btn ghost small del">Löschen</button><span class="confirm" hidden>Wirklich löschen? <button type="button" class="btn primary small yes">Ja, löschen</button> <button type="button" class="btn ghost small no">Abbrechen</button></span><span class="note st"></span></td></tr>`).join("")}</tbody></table></div></div>`;
-  html += `<div class="panel"><div class="panel-head"><h2>Rohdaten</h2><p class="note">Alle Antworten als CSV (Semikolon-getrennt, für Excel).</p></div>
-    <div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="csvSave">CSV herunterladen</button><button type="button" class="btn ghost" id="csvCopy">CSV kopieren</button><span class="note" id="csvNote"></span></div></div>`;
+    sorted.map(({r,i})=>`<tr data-i="${i}"><td>${esc(fmtD(r._created||r.submittedAt))}</td><td>${r.kind!=="workshop"&&R.includes(r)?`<button type="button" class="firm link" data-firm="${R.indexOf(r)}">${esc(firmName(r))}</button>`:esc(firmName(r))}</td><td>${esc(r.answers.rolle||"")}</td><td>${esc(r.answers.nps??"")}</td><td>${r.kind==="workshop"?"Neukunden-Einladung":(r._src==="db"?"Umfrage":"Umfrage (Code)")}${DUP.has(i)?' <span class="ws-date">Doppelt</span>':""}</td>
+      <td class="act"><button type="button" class="btn ghost small del">Löschen</button><span class="confirm" hidden>Wirklich löschen? <button type="button" class="btn primary small yes">Ja, löschen</button> <button type="button" class="btn ghost small no">Abbrechen</button></span><span class="note st"></span></td></tr>`).join("")}</tbody></table></div>
+    <div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="csvSave">CSV herunterladen</button><button type="button" class="btn ghost" id="csvCopy">CSV kopieren</button><span class="note" id="csvNote"></span></div></div></section>`;
   results.innerHTML = html;
+  bindResults();
+}
+
+/* Firmenprofil */
+function openFirm(idx){
+  const r = VIEW.R[idx]; if(!r) return; const A = r.answers;
+  const secs = SECTIONS.filter(s=>s.items && s.items.length && s.kind!=="overall");
+  const row = (l,v)=> v ? `<div class="pf-row"><span class="muted">${esc(l)}</span><span>${esc(Array.isArray(v)?v.join(", "):v)}</span></div>` : "";
+  const txt = (l,k)=> A[k] ? `<div class="comment"><div class="who">${esc(l)}</div>${esc(A[k])}</div>` : "";
+  const d = document.getElementById("firmDlg");
+  d.querySelector(".pf-body").innerHTML = `<div class="panel-head"><span class="eyebrow">Firmenprofil · eingegangen ${esc(fmtD(r._created||r.submittedAt))}</span><h2>${esc(firmName(r))}</h2></div>
+    <div class="pf-grid">${row("Funktion",A.rolle)}${row("Kunde seit",A.seit)}${row("Temporärmitarbeitende",A.ma)}${row("Leistungen",A.services)}${row("NPS (0–10)",A.nps)}${row("Gesamtzufriedenheit (1–6)",A.g_total)}${row("Fortschritte 2026",A.g_fortschritt)}${row("Tendenz Software",A.trend_sw)}${row("Tendenz BPO",A.trend_bpo)}${row("API",A.api)}${row("Eigene Lösungen",A.insel)}${row("Workshop",A.ws_termin)}</div>
+    ${secs.map(s=>{ const its = s.items.filter(([k])=>A[k]!=null&&A[k]!==""); return its.length?`<div><h3>${esc(s.title)}</h3><div class="pf-rates">${its.map(([k,l])=>`<div class="pf-rate">${cell(num(A[k]))}<span>${esc(l)}</span></div>`).join("")}</div></div>`:""; }).join("")}
+    ${(r.roadmap||[]).length?`<div><h3>Roadmap Top 3</h3><div class="rm-who">${r.roadmap.map(x=>`<span class="chip"><b>Platz ${x.rank}</b> ${esc(x.title)}${x.own?" (eigenes Thema)":""}</span>`).join("")}</div></div>`:""}
+    ${txt("Grösster Zeitfresser","f_zeit")}${txt("Arbeiten ausserhalb von Apriko","f_extern")}${txt("Gewünschte Anbindungen","api_txt")}${txt("Eigene Lösungen","insel_txt")}${txt("Fortschritte – Kommentar","g_fortschritt_txt")}${txt("Was wir verbessern sollen","g_improve")}${txt("Was geschätzt wird","g_best")}${txt("Roadmap – Beschreibung","c_roadmap")}${txt("BPO – Anmerkungen","c_bpo")}
+    ${A.kname||A.kmail||A.ws_name?`<div><h3>Kontakt</h3>${row("Name",A.kname||A.ws_name)}${row("E-Mail",A.kmail||A.ws_mail)}</div>`:""}`;
+  if(typeof d.showModal === "function") d.showModal(); else d.setAttribute("open","");
+}
+function bindResults(){
+  results.onclick = e=>{ const f = e.target.closest(".firm[data-firm]"); if(f){ e.preventDefault(); openFirm(+f.dataset.firm); } };
   document.getElementById("csvCopy").onclick = async ()=>{ const note=document.getElementById("csvNote"); try{ await navigator.clipboard.writeText(toCsv()); note.textContent="CSV kopiert."; }catch(e){ note.textContent="Kopieren nicht möglich, bitte Download verwenden."; } };
   const wsc = document.getElementById("wsCopy");
   if(wsc) wsc.onclick = async ()=>{
     const wsDates = WS_TERMINE.slice(0, Math.max(0, WS_TERMINE.length-2));
-    const list = latest.filter(r=>r && wsDates.includes(r.answers.ws_termin)).map(r=>r.answers.ws_mail).filter(Boolean);
+    const list = VIEW.ALL.filter(r=>r && wsDates.includes(r.answers.ws_termin)).map(r=>r.answers.ws_mail).filter(Boolean);
     const txt = [...new Set(list)].join("; "), note = document.getElementById("wsNote");
-    try{ await navigator.clipboard.writeText(txt); note.textContent = list.length + " Adressen kopiert (für BCC)."; }catch(e){ note.textContent = txt; }
+    try{ await navigator.clipboard.writeText(txt); note.textContent = new Set(list).size + " Adressen kopiert (für BCC)."; }catch(e){ note.textContent = txt; }
   };
   const tb = document.querySelector("table.answers");
-  if(tb) tb.onclick = async e=>{
+  if(tb) tb.addEventListener("click", async e=>{
     const tr = e.target.closest("tr[data-i]"); if(!tr) return;
     const rec = latest[+tr.dataset.i], conf = tr.querySelector(".confirm"), del = tr.querySelector(".del"), st = tr.querySelector(".st");
     if(e.target.classList.contains("del")){ del.hidden = true; conf.hidden = false; tr.querySelector(".yes").focus(); return; }
     if(e.target.classList.contains("no")){ conf.hidden = true; del.hidden = false; return; }
     if(!e.target.classList.contains("yes")) return;
     conf.hidden = true; st.textContent = "Lösche …";
-    if(rec._src === "code"){
-      store = store.filter(c=>c !== rec._code); persist(); await refresh(); return;
-    }
+    if(rec._src === "code"){ store = store.filter(c=>c !== rec._code); persist(); await refresh(); return; }
     try{
       const r = await fetch(SUPABASE_URL + "/rest/v1/umfrage_antworten?id=eq." + encodeURIComponent(rec._id),
         { method:"DELETE", headers:{ "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token, "Prefer":"return=representation" } });
@@ -192,12 +351,19 @@ function renderResults(){
       if(!r.ok || !gone.length) throw new Error(r.status === 401 ? "Sitzung abgelaufen, bitte neu anmelden" : "nicht gelöscht");
       dbRows = dbRows.filter(x=>x._id !== rec._id); await refresh();
     }catch(err){ st.textContent = "Fehler: " + err.message; del.hidden = false; }
-  };
+  });
   document.getElementById("csvSave").onclick = ()=>{
-    const blob = new Blob(["\uFEFF"+toCsv()],{type:"text/csv;charset=utf-8"});
+    const blob = new Blob(["﻿"+toCsv()],{type:"text/csv;charset=utf-8"});
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "apriko-kundenumfrage-2026.csv";
     document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500); };
 }
+/* Tooltip für Zellen und Balken */
+(function(){
+  const tip = document.getElementById("tip");
+  document.addEventListener("pointerover", e=>{ const t = e.target.closest("[data-tip]"); if(!t){ tip.hidden = true; return; } tip.textContent = t.dataset.tip; tip.hidden = false; });
+  document.addEventListener("pointermove", e=>{ if(tip.hidden) return; const w = tip.offsetWidth, x = Math.min(e.clientX + 14, window.innerWidth - w - 8); tip.style.left = Math.max(8,x) + "px"; tip.style.top = (e.clientY + 16) + "px"; });
+  document.addEventListener("scroll", ()=>{ tip.hidden = true; }, {passive:true});
+})();
 function toCsv(){
   const keys = ["kind","firma","rolle","seit","ma","services"]; SECTIONS.filter(s=>s.items).forEach(s=>{ s.items.forEach(i=>keys.push(i[0])); keys.push("c_"+s.id); });
   keys.push("f_zeit","f_extern","api","api_txt","insel","insel_txt","trend_sw","trend_bpo","c_bpo","bpo_interest","c_roadmap","nps","g_fortschritt","g_fortschritt_txt","g_total","g_preis","g_best","g_improve","callback","kname","kmail","ws_termin","ws_name","ws_mail");
