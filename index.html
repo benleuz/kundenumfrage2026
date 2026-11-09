@@ -49,6 +49,8 @@ let step = 0, visited = new Set([0]);
 let sent = false;
 
 function loadDraft(){ try{ const s = localStorage.getItem(DRAFT_KEY); if(s){ const d = JSON.parse(s); if(d && d.answers) state = Object.assign(state,d);} }catch(e){} }
+/* Sendungs-ID: verhindert, dass dieselben Antworten zweimal gespeichert werden (z. B. zwei offene Tabs) */
+function ensureSid(){ if(!state.sid){ try{ state.sid = crypto.randomUUID(); }catch(e){ state.sid = Date.now().toString(36) + Math.random().toString(36).slice(2); } } return state.sid; }
 function saveDraft(){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); }catch(e){} }
 function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY);}catch(e){} }
 const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -313,7 +315,7 @@ function buildPayload(){
   return {
     answers,
     roadmap: state.roadmap.prio.map((id,i)=>{const t=topicById(id); return {rank:i+1,id,title:t.title,own:t.own};}),
-    submittedAt: new Date().toISOString(), version: 2, scale: SCALE.length
+    sid: ensureSid(), submittedAt: new Date().toISOString(), version: 2, scale: SCALE.length
   };
 }
 function plainText(p){
@@ -350,7 +352,7 @@ function renderSubmit(){
     <div class="nav"><button type="button" class="btn ghost" id="prev">Zurück</button><button type="button" class="btn primary" id="send" ${m.length?'disabled':''}>Antworten senden</button></div>
   </div>`;
   document.getElementById("prev").onclick = ()=>go(step-1);
-  document.getElementById("send").onclick = send;
+  document.getElementById("send").onclick = ()=>{ syncFields(); send(); };
 }
 async function send(){
   const btn = document.getElementById("send"), area = document.getElementById("submitArea");
@@ -366,7 +368,7 @@ async function send(){
         body: JSON.stringify({ umfrage: UMFRAGE_ID, firma: (p.answers.firma||"").trim() || null, payload: p })
       });
       clearTimeout(to);
-      if(r.ok){
+      if(r.ok || r.status === 409){   // 409 = mit dieser Sendungs-ID schon gespeichert
         clearDraft(); sent = true;
         area.innerHTML = `<div class="msg ok"><b>Vielen Dank! Deine Antworten sind bei uns angekommen.</b>${wsIsDate()?`<span><b>${esc(T("ws_bestaetigung","Deine Workshop-Anmeldung ist eingegangen."))}</b><br>Termin: ${esc(wsChoice())}</span>`:""}<span class="muted">Du kannst dieses Fenster jetzt schliessen.</span></div>`;
         btn.hidden = true; const pv = document.getElementById("prev"); if(pv) pv.hidden = true;
@@ -410,8 +412,14 @@ function keepPlace(){
   const top = sv.getBoundingClientRect().top + window.scrollY;
   if(window.scrollY > top) window.scrollTo({top, behavior:"auto"});
 }
+/* Übernimmt alle sichtbaren Text-/E-Mail-Felder aus der Maske – auch Vorbelegtes oder vom Browser automatisch Ausgefülltes */
+function syncFields(){
+  form.querySelectorAll('input[type="text"][name],input[type="email"][name],textarea[name]').forEach(el=>{ A()[el.name] = el.value; });
+  saveDraft();
+}
 function go(i){
   if(i<0||i>ACTIVE().length) return;
+  syncFields();
   step = i; visited.add(i); render();
   keepPlace();
 }
@@ -435,7 +443,7 @@ function showIntro(){
 }
 let started = false;
 try{ started = sessionStorage.getItem("apriko-umfrage-start")==="1"; }catch(e){}
-loadDraft();
+loadDraft(); ensureSid(); saveDraft();
 if(!started && !Object.keys(A()).length) showIntro(); else render();
 })();
 </script>

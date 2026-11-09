@@ -59,7 +59,12 @@ function avg(arr){ const v = arr.filter(x=>x!=null&&x!=="na"&&x!=="").map(Number
 function color(v,max){ const r=v/max; return r>=.75?"var(--good)":r>=.55?"var(--warn)":"var(--bad)"; }
 let latest = [];
 function renderResults(){
-  const ALL = latest;                                   // inkl. Neukunden-Workshop-Anmeldungen
+  /* Doppelt abgeschickte Antworten (gleiche Sendungs-ID oder identischer Inhalt) zählen nur einmal; die älteste bleibt */
+  const byAge = latest.map((r,i)=>({r,i})).sort((a,b)=>String(a.r._created||a.r.submittedAt||"").localeCompare(String(b.r._created||b.r.submittedAt||"")));
+  const dupKey = r=> r.sid ? "sid:"+r.sid : (r.kind||"")+"|"+JSON.stringify(r.answers||{})+"|"+JSON.stringify(r.roadmap||[]);
+  const seenK = new Set(), DUP = new Set();
+  byAge.forEach(({r,i})=>{ const k = dupKey(r); if(seenK.has(k)) DUP.add(i); else seenK.add(k); });
+  const ALL = latest.filter((r,i)=>!DUP.has(i));       // inkl. Neukunden-Workshop-Anmeldungen, ohne Doppelte
   const R = ALL.filter(r=>r.kind!=="workshop"), n = R.length;   // nur Umfrage-Antworten
   if(!ALL.length){ results.innerHTML = `<div class="panel"><div class="panel-head"><span class="eyebrow">Auswertung</span><h2>Noch keine Antworten</h2><p class="muted">Füg oben die Antwort-Codes aus den Kunden-Mails ein. Danach erscheinen hier NPS, Bewertungen pro Bereich, die Roadmap-Rangliste und alle Kommentare.</p></div></div>`; return; }
   const nps = R.map(r=>r.answers.nps).filter(x=>x!=null).map(Number);
@@ -152,11 +157,11 @@ function renderResults(){
     cb?`<div><h3>Gesprächswünsche</h3>${R.filter(r=>r.answers.callback).map(r=>`<div class="comment"><div class="who">${esc(r.answers.firma||'anonym')}</div>${esc(r.answers.kname||'')} · ${esc(r.answers.kmail||'')}</div>`).join("")}</div>`:''}</div>`;
   // Einzelne Antworten mit Löschen
   const fmt = d=>{ try{ return new Date(d).toLocaleString("de-CH",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } };
-  const sorted = ALL.map((r,i)=>({r,i})).sort((a,b)=>String(b.r._created||b.r.submittedAt||"").localeCompare(String(a.r._created||a.r.submittedAt||"")));
-  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Einzelne Antworten</span><h2>Alle Einträge (${ALL.length})</h2>
+  const sorted = latest.map((r,i)=>({r,i})).sort((a,b)=>String(b.r._created||b.r.submittedAt||"").localeCompare(String(a.r._created||a.r.submittedAt||"")));
+  html += `<div class="panel"><div class="panel-head"><span class="eyebrow">Einzelne Antworten</span><h2>Alle Einträge (${latest.length})</h2>${DUP.size?`<p class="note"><b>${DUP.size} doppelt abgeschickt</b> – zählt nur einmal; du kannst das Doppel löschen.</p>`:""}
     <p class="note">Tests oder Doppelte hier löschen, damit sie nicht in die Auswertung einfliessen. Gelöschte Datenbank-Antworten sind endgültig weg.</p></div>
     <div class="tablewrap"><table class="answers"><thead><tr><th>Eingegangen</th><th>Firma</th><th>Funktion</th><th>NPS</th><th>Quelle</th><th></th></tr></thead><tbody>${
-    sorted.map(({r,i})=>`<tr data-i="${i}"><td>${esc(fmt(r._created||r.submittedAt))}</td><td>${esc(r.answers.firma||"anonym")}</td><td>${esc(r.answers.rolle||"")}</td><td>${esc(r.answers.nps??"")}</td><td>${r.kind==="workshop"?"Neukunden-Einladung":(r._src==="db"?"Umfrage":"Umfrage (Code)")}</td>
+    sorted.map(({r,i})=>`<tr data-i="${i}"><td>${esc(fmt(r._created||r.submittedAt))}</td><td>${esc(r.answers.firma||"anonym")}</td><td>${esc(r.answers.rolle||"")}</td><td>${esc(r.answers.nps??"")}</td><td>${r.kind==="workshop"?"Neukunden-Einladung":(r._src==="db"?"Umfrage":"Umfrage (Code)")}${DUP.has(i)?' <span class="ws-date">Doppelt</span>':""}</td>
       <td class="act"><button type="button" class="btn ghost small del">Löschen</button><span class="confirm" hidden>Wirklich löschen? <button type="button" class="btn primary small yes">Ja, löschen</button> <button type="button" class="btn ghost small no">Abbrechen</button></span><span class="note st"></span></td></tr>`).join("")}</tbody></table></div></div>`;
   html += `<div class="panel"><div class="panel-head"><h2>Rohdaten</h2><p class="note">Alle Antworten als CSV (Semikolon-getrennt, für Excel).</p></div>
     <div class="nav" style="justify-content:flex-start"><button type="button" class="btn primary" id="csvSave">CSV herunterladen</button><button type="button" class="btn ghost" id="csvCopy">CSV kopieren</button><span class="note" id="csvNote"></span></div></div>`;
